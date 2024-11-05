@@ -3,6 +3,7 @@ import '../css/app.css';
 import { createApp } from 'vue';
 import ExampleComponent from './components/ExampleComponent.vue';
 import LoginForm from './components/LoginForm.vue';
+import Profile from './components/Profile.vue';
 import axios from 'axios';
 
 const app = createApp({
@@ -27,4 +28,5 @@ const app = createApp({
 
 app.component('example-component', ExampleComponent);
 app.component('login-form', LoginForm);
+app.component('profile', Profile);
 app.mount('#app');

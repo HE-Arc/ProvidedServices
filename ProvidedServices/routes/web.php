@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
@@ -27,3 +28,7 @@ Route::post('/logout', function () {
 Route::get('/api/user', function () {
     return response()->json(Auth::user());
 })->middleware('auth');
+
+Route::get('/profile/{id}', [ProfileController::class, 'show'])->middleware('auth');
+
+Route::put('/profile/{id}', [ProfileController::class, 'update'])->middleware('auth');
