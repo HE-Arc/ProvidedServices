@@ -1,10 +1,12 @@
 <template>
-  <div>
-      <h1 v-if="user">Hello, {{ user.first_name }} {{ user.last_name }}</h1>
-      <h1 v-else>Loading...</h1>
-      <button v-if="user" @click="logout">Logout</button>
-  </div>
-</template>
+    <div>
+        <h1 v-if="user">Hello, {{ user.first_name }} {{ user.last_name }}</h1>
+        <h1 v-else>Loading...</h1>
+        <button v-if="user" @click="logout">Logout</button>
+        <button v-if="user" @click="goToProfile(user.id)">View Profile</button> <!-- Nouveau bouton -->
+    </div>
+  </template>
+  
 
 <script>
 import axios from 'axios';
@@ -39,6 +41,10 @@ export default {
               .catch(error => {
                   console.error('Error during logout:', error);
               });
+      },
+      goToProfile(userId) {
+        // Redirige vers la page de profil de l'utilisateur
+        window.location.href = `/profile/${userId}`;
       }
   }
 };
