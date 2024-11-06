@@ -2,28 +2,19 @@
   <div class="profile-container">
     <h1>User Profile</h1>
     <div class="profile-info">
-      <div class="profile-field">
-        <label>First Name:</label>
-        <span>{{ user.first_name }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Last Name:</label>
-        <span>{{ user.last_name }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Email:</label>
-        <span>{{ user.email }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Gender:</label>
-        <span>{{ user.genre === 'male' ? 'Male' : 'Female' }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Role:</label>
-        <span>{{ user.role === 'client' ? 'Client' : 'Provider' }}</span>
+      <div class="profile-field" v-for="(value, key) in profileFields" :key="key">
+        <label>{{ value.label }}:</label>
+        <span v-if="!isEditing">{{ value.display }}</span>
+        <template v-else>
+          <input v-if="value.type === 'text'" v-model="editableUser[key]" :type="value.inputType" />
+          <select v-else v-model="editableUser[key]">
+            <option v-for="(label, optionValue) in value.options" :value="optionValue">{{ label }}</option>
+          </select>
+        </template>
       </div>
     </div>
 
+    <button @click="toggleEditMode">{{ isEditing ? 'Save' : 'Edit' }}</button>
     <button @click="openCvModal">CV</button>
     <button @click="goBack">Back to Home</button>
 
@@ -35,10 +26,12 @@
           <input type="file" @change="handleCvUpload" accept="application/pdf" />
           <button v-if="cvFile" @click="saveCv">Save CV</button>
         </div>
-        <div v-if="cvFile" class="cv-display">
+
+        <div v-if="cvUrl" class="cv-display">
           <p>Uploaded CV:</p>
           <a :href="cvUrl" target="_blank">View CV</a>
         </div>
+
         <button @click="closeCvModal">Close</button>
       </div>
     </div>
@@ -57,46 +50,95 @@ export default {
   },
   data() {
     return {
+      isEditing: false,
+      editableUser: { ...this.user }, // Créer une copie de l'utilisateur
       showCvModal: false,
       cvFile: null,
-      cvUrl: null, // Lien pour afficher le CV
-      errorMessage: '' // Pour afficher les erreurs
+      cvUrl: null,
     };
+  },
+  computed: {
+    profileFields() {
+      return {
+        first_name: { label: "First Name", display: this.editableUser.first_name, type: "text", inputType: "text" },
+        last_name: { label: "Last Name", display: this.editableUser.last_name, type: "text", inputType: "text" },
+        email: { label: "Email", display: this.editableUser.email, type: "text", inputType: "email" },
+        genre: { label: "Gender", display: this.editableUser.genre === 'male' ? 'Male' : 'Female', type: "select", options: { male: "Male", female: "Female" } },
+        role: { label: "Role", display: this.editableUser.role === 'client' ? 'Client' : 'Provider', type: "select", options: { client: "Client", provider: "Provider" } },
+      };
+    }
+  },
+  mounted() {
+    this.fetchUserCv();
   },
   methods: {
     goBack() {
       window.history.back();
+    },
+    toggleEditMode() {
+      if (this.isEditing) {
+        axios.put(`/api/profile/${this.user.id}/update`, {
+            first_name: this.editableUser.first_name,
+            last_name: this.editableUser.last_name,
+            email: this.editableUser.email,
+            role: this.editableUser.role,
+            genre: this.editableUser.genre,
+        })
+        .then(response => {
+            // Mettre à jour directement `editableUser` avec les nouvelles données
+            this.editableUser = { ...response.data.user };  // Mise à jour avec les données du serveur
+            this.isEditing = false;
+        })
+        .catch(error => {
+            console.error('Error saving profile:', error.response ? error.response.data : error);
+            alert("An error occurred while saving your profile.");
+        });
+      } else {
+        this.isEditing = true;
+      }
     },
     openCvModal() {
       this.showCvModal = true;
     },
     closeCvModal() {
       this.showCvModal = false;
-      this.cvFile = null; // Réinitialise le fichier sélectionné
+      this.cvFile = null;
     },
     handleCvUpload(event) {
       this.cvFile = event.target.files[0];
+    },
+    fetchUserCv() {
+      axios.get(`/api/profile/${this.user.id}/cv`)  // GET pour récupérer le CV
+        .then(response => {
+          this.cvUrl = response.data.cvUrl;
+        })
+        .catch(error => {
+          console.error('Error fetching CV:', error);
+        });
     },
     saveCv() {
       if (!this.cvFile) return;
 
       const formData = new FormData();
       formData.append("cv", this.cvFile);
-      formData.append("userId", this.user.id);
 
       axios.post(`/api/profile/${this.user.id}/upload-cv`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
+        headers: { "Content-Type": "multipart/form-data" }
       })
       .then(response => {
-        this.cvUrl = response.data.cvUrl; // Enregistre l'URL du CV pour l'afficher
+        this.cvUrl = response.data.cvUrl;
         alert("CV uploaded successfully!");
+        this.closeCvModal();
       })
       .catch(error => {
         console.error('Error uploading CV:', error);
         alert("An error occurred while uploading the CV.");
       });
+    }
+  },
+  watch: {
+    user(newUser) {
+      this.editableUser = { ...newUser };  // Réinitialiser editableUser lorsqu'une nouvelle prop `user` est reçue
     }
   }
 };

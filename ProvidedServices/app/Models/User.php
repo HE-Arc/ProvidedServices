@@ -17,7 +17,7 @@ class User extends Authenticatable
         'salt',
         'first_name',
         'last_name',
-        'gender',
+        'genre',
         'role',
         'description'
     ];

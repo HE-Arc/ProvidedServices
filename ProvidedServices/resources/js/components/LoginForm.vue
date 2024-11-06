@@ -34,7 +34,6 @@
                             <select v-model="form.gender" class="form-control" required>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
-                                <option value="other">Other</option>
                             </select>
                         </div>
 
@@ -43,7 +42,7 @@
                             <label for="role" class="form-label">Role</label>
                             <select v-model="form.role" class="form-control" required>
                                 <option value="client">Client</option>
-                                <option value="prestataire">Prestataire</option>
+                                <option value="prestataire">Provider</option>
                             </select>
                         </div>
 
@@ -147,7 +146,12 @@ export default {
                 }, 1000); // Redirect after 1 second
             })
             .catch(error => {
-                this.showNotification('Invalid credentials', 'error');
+                if (error.response && error.response.data.message) {
+                    // Afficher l'erreur spécifique renvoyée par le backend
+                    this.showNotification(error.response.data.message, 'error');
+                } else {
+                    this.showNotification('An unknown error occurred', 'error');
+                }
             });
         },
         register() {
@@ -157,7 +161,17 @@ export default {
                 this.isRegistering = false;
             })
             .catch(error => {
-                this.showNotification('Error during registration', 'error');
+                if (error.response && error.response.data.errors) {
+                    // Afficher les erreurs de validation spécifiques
+                    const errors = error.response.data.errors;
+                    let errorMessage = 'Please fix the following errors:\n';
+                    for (const field in errors) {
+                        errorMessage += `${field}: ${errors[field].join(', ')}\n`;
+                    }
+                    this.showNotification(errorMessage, 'error');
+                } else {
+                    this.showNotification('Error during registration', 'error');
+                }
             });
         }
     }
@@ -166,102 +180,4 @@ export default {
 
 <style scoped>
 /* Notification Styles */
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 20px;
-    border-radius: 5px;
-    font-size: 1rem;
-    z-index: 1000;
-    opacity: 0;
-    animation: fadeInOut 5s forwards;
-}
-
-.notification.success {
-    background-color: #28a745;
-    color: white;
-}
-
-.notification.error {
-    background-color: #dc3545;
-    color: white;
-}
-
-@keyframes fadeInOut {
-    0% { opacity: 0; transform: translateY(-20px); }
-    10% { opacity: 1; transform: translateY(0); }
-    90% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-20px); }
-}
-
-/* Form Container */
-.container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    background-color: #f8f9fa;
-}
-
-/* Title */
-h2 {
-    margin-bottom: 20px;
-    font-size: 1.8rem;
-    color: #343a40;
-    font-weight: bold;
-}
-
-/* Form group */
-.mb-3 {
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Labels */
-.form-label {
-    margin-bottom: 5px;
-    font-weight: bold;
-    font-size: 1rem;
-}
-
-/* Input Fields */
-.form-control {
-    padding: 10px;
-    font-size: 1rem;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-/* Buttons */
-.btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-    padding: 10px;
-    font-size: 1rem;
-    border-radius: 4px;
-    width: 100%;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #004085;
-}
-
-/* Links */
-a {
-    color: #007bff;
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-/* Text Alignment */
-.text-center {
-    text-align: center;
-}
 </style>

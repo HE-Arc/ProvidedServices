@@ -23,12 +23,12 @@ class AuthController extends Controller
         $user = User::where('email', $credentials['email'])->first();
 
         if (!$user) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json(['message' => 'User not found. Please check your email address and try again.'], 401);
         }
 
         // Combiner le mot de passe fourni avec le salt, puis vérifier avec le hash stocké
         if (!Hash::check($credentials['password'] . $user->salt, $user->password_hash)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json(['message' => 'Invalid credentials. Please check your password and try again.'], 401);
         }
 
         // Si les informations d'identification sont correctes

@@ -31,4 +31,8 @@ Route::get('/api/user', function () {
 
 Route::get('/profile/{id}', [ProfileController::class, 'show'])->middleware('auth');
 
-Route::put('/profile/{id}', [ProfileController::class, 'update'])->middleware('auth');
+Route::put('/api/profile/{id}/update', [ProfileController::class, 'update'])->middleware('auth');
+
+Route::post('/api/profile/{id}/upload-cv', [ProfileController::class, 'uploadCv'])->middleware('auth');
+
+Route::get('/api/profile/{user_id}/cv', [ProfileController::class, 'getCv'])->middleware('auth');
