@@ -19,7 +19,7 @@ class User extends Authenticatable
         'last_name',
         'genre',
         'role',
-        'description'
+        'cv_path'
     ];
 
     protected $hidden = [

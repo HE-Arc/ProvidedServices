@@ -6,7 +6,7 @@
 </head>
 <body>
     <div id="app">
-        <profile :user="{{ json_encode($user) }}">></profile>
+        <profile :user="{{ json_encode($user) }}" :auth-user-id="{{ json_encode($authUserId) }}"></profile>
     </div>
 </body>
 </html>

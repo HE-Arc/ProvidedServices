@@ -16,8 +16,8 @@ class ProfileController extends Controller
     {
         // Vérifiez si l'utilisateur est authentifié
         if (Auth::check()) {
-            // Retournez la vue avec les données de l'utilisateur
-            return view('profile', ['user' => Auth::user()]); // Assurez-vous que vous avez une vue profile.blade.php
+            $user = User::findOrFail($id);
+            return view('profile', ['user' => $user, 'authUserId' => Auth::id()]);
         }
 
         // Si non authentifié, redirigez vers la page de connexion
@@ -25,7 +25,7 @@ class ProfileController extends Controller
     }
 
     public function update(Request $request, $id) {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
         
         if ($user) {
             // Validation des données envoyées
@@ -66,7 +66,7 @@ class ProfileController extends Controller
             $path = $file->storeAs('cvs', $filename, 'public');
     
             // Mettre à jour le profil de l'utilisateur avec le chemin du fichier
-            $user->description = $path;
+            $user->cv_path = $path;
             $user->save();
     
             // Retourner la réponse avec le lien vers le fichier
@@ -83,14 +83,15 @@ class ProfileController extends Controller
     {
         $user = User::findOrFail($user_id);
         // Supposons que le chemin du CV est stocké dans un champ `cv_path` dans la table `users`
-        if ($user->description) {
+        if ($user->cv_path) {
             return response()->json([
-                'cvUrl' => Storage::url($user->description)
+                'cvUrl' => Storage::url($user->cv_path)
             ]);
         } else {
+            // Retourner un tableau vide ou un objet avec la clé 'cvUrl' à null
             return response()->json([
-                'message' => 'No CV found for this user.'
-            ], 404);
+                'cvUrl' => null
+            ]);
         }
     }
 }

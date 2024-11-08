@@ -14,20 +14,27 @@
       </div>
     </div>
 
-    <button @click="toggleEditMode">{{ isEditing ? 'Save' : 'Edit' }}</button>
-    <button @click="openCvModal">CV</button>
+    <!-- Afficher le bouton Edit uniquement si l'utilisateur est le propriétaire du profil -->
+    <button v-if="authUserId === user.id" @click="toggleEditMode">{{ isEditing ? 'Save' : 'Edit' }}</button>
+
+    <!-- Si l'utilisateur est le propriétaire, il peut uploader un CV -->
+    <button v-if="authUserId === user.id" @click="openCvModal">Upload CV</button>
+
+    <!-- Si l'utilisateur n'est pas le propriétaire, il peut seulement voir le CV -->
+    <button v-else @click="openCvModal">View CV</button>
+
     <button @click="goBack">Back to Home</button>
 
     <!-- Modal pour l'ajout du CV -->
     <div v-if="showCvModal" class="modal-overlay" @click.self="closeCvModal">
       <div class="modal-content">
-        <h2>Upload CV</h2>
-        <div class="cv-upload">
+        <h2>{{ authUserId === user.id ? 'Upload CV' : 'View CV' }}</h2>
+        <div class="cv-upload" v-if="authUserId === user.id">
           <input type="file" @change="handleCvUpload" accept="application/pdf" />
           <button v-if="cvFile" @click="saveCv">Save CV</button>
         </div>
 
-        <div v-if="cvUrl" class="cv-display">
+        <div v-if="cvUrl">
           <p>Uploaded CV:</p>
           <a :href="cvUrl" target="_blank">View CV</a>
         </div>
@@ -45,6 +52,10 @@ export default {
   props: {
     user: {
       type: Object,
+      required: true
+    },
+    authUserId: {
+      type: Number,
       required: true
     }
   },
@@ -77,7 +88,7 @@ export default {
     },
     toggleEditMode() {
       if (this.isEditing) {
-        axios.put(`/api/profile/${this.user.id}/update`, {
+        axios.put(`/api/profile/${this.user.id}`, {
             first_name: this.editableUser.first_name,
             last_name: this.editableUser.last_name,
             email: this.editableUser.email,
@@ -108,12 +119,15 @@ export default {
       this.cvFile = event.target.files[0];
     },
     fetchUserCv() {
-      axios.get(`/api/profile/${this.user.id}/cv`)  // GET pour récupérer le CV
+      axios.get(`/api/profile/${this.user.id}/cv`)
         .then(response => {
+          // Vérifier si le CV existe ou pas
           this.cvUrl = response.data.cvUrl;
         })
         .catch(error => {
           console.error('Error fetching CV:', error);
+          // Vous pouvez aussi assigner null à `cvUrl` ici si besoin
+          this.cvUrl = null;
         });
     },
     saveCv() {
@@ -134,7 +148,7 @@ export default {
         console.error('Error uploading CV:', error);
         alert("An error occurred while uploading the CV.");
       });
-    }
+    },
   },
   watch: {
     user(newUser) {
@@ -145,98 +159,5 @@ export default {
 </script>
 
 <style scoped>
-.profile-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  background-color: #f9f9f9;
-}
-
-h1, h2 {
-  color: #343a40;
-  text-align: center;
-}
-
-.profile-info {
-  margin-top: 20px;
-}
-
-.profile-field {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.profile-field:last-child {
-  border-bottom: none;
-}
-
-label {
-  font-weight: bold;
-}
-
-span {
-  color: #555;
-}
-
-button {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  margin-top: 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-/* Styles pour la modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  text-align: center;
-}
-
-.cv-upload {
-  margin-bottom: 20px;
-}
-
-.cv-display {
-  margin-top: 10px;
-  color: #007bff;
-}
-
-.modal-content button {
-  width: auto;
-  background-color: #007bff;
-}
-
-.modal-content button:hover {
-  background-color: #0056b3;
-}
+/* Styles ici */
 </style>
