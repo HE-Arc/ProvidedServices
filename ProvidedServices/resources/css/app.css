@@ -2,20 +2,17 @@
     position: fixed;
     top: 20px;
     right: 20px;
-    padding: 15px 20px;
+    padding: 10px 20px;
     border-radius: 5px;
-    font-size: 1rem;
-    z-index: 1000;
-    opacity: 0;
-    animation: fadeInOut 5s forwards;
+    z-index: 9999;
 }
 
-.notification.success {
+.success {
     background-color: #28a745;
     color: white;
 }
 
-.notification.error {
+.error {
     background-color: #dc3545;
     color: white;
 }
@@ -25,6 +22,10 @@
     10% { opacity: 1; transform: translateY(0); }
     90% { opacity: 1; }
     100% { opacity: 0; transform: translateY(-20px); }
+}
+
+.fade-in-out {
+    animation: fadeInOut 5s;
 }
 
 /* Form Container */
@@ -53,10 +54,11 @@ h2 {
 }
 
 /* Labels */
-.form-label {
+label {
     margin-bottom: 5px;
     font-weight: bold;
     font-size: 1rem;
+    color: #495057;
 }
 
 /* Input Fields */
@@ -156,6 +158,21 @@ button:hover {
     background-color: #0056b3;
 }
 
+input[type="text"], textarea {
+    padding: 10px;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: #ffffff;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
 /* Styles pour la modal */
 .modal-overlay {
     position: fixed;
@@ -194,4 +211,43 @@ button:hover {
 
 .modal-content button:hover {
     background-color: #0056b3;
+}
+
+/* Compétences sélectionnées et non sélectionnées */
+.skills-list, .selected-skills {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.skills-list li, .selected-skills li {
+    cursor: pointer;
+    padding: 8px 12px;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    color: #495057;
+    border-radius: 20px;
+    transition: background-color 0.2s, color 0.2s;
+    font-size: 0.9rem;
+}
+
+.skills-list li:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.selected-skills li {
+    background-color: #007bff;
+    color: white;
+}
+
+.selected-skills li:hover {
+    background-color: #0056b3;
+}
+
+.remove-btn{
+    color: white
 }

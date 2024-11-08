@@ -38,3 +38,9 @@ Route::put('/api/profile/{id}', [ProfileController::class, 'update'])->name('pro
 Route::post('/api/profile/{id}/upload-cv', [ProfileController::class, 'uploadCv'])->middleware('auth');
 
 Route::get('/api/profile/{user_id}/cv', [ProfileController::class, 'getCv'])->middleware('auth');
+
+Route::get('/create-offer', [JobPostController::class, 'create'])->name('create.offer')->middleware('auth');
+
+Route::post('/api/job_posts', [JobPostController::class, 'store'])->middleware('auth');
+
+Route::get('/api/skills', [SkillsController::class, 'index']);

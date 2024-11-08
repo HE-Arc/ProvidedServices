@@ -1,5 +1,6 @@
 <template>
   <div class="profile-container">
+    <Notification ref="notification"/>
     <h1>User Profile</h1>
     <div class="profile-info">
       <div class="profile-field" v-for="(value, key) in profileFields" :key="key">
@@ -47,8 +48,12 @@
 
 <script>
 import axios from 'axios';
+import Notification from './Notification.vue';
 
 export default {
+  components: {
+      Notification 
+  },
   props: {
     user: {
       type: Object,
@@ -88,26 +93,26 @@ export default {
     },
     toggleEditMode() {
       if (this.isEditing) {
-        axios.put(`/api/profile/${this.user.id}`, {
-            first_name: this.editableUser.first_name,
-            last_name: this.editableUser.last_name,
-            email: this.editableUser.email,
-            role: this.editableUser.role,
-            genre: this.editableUser.genre,
-        })
-        .then(response => {
-            // Mettre à jour directement `editableUser` avec les nouvelles données
-            this.editableUser = { ...response.data.user };  // Mise à jour avec les données du serveur
-            this.isEditing = false;
-        })
-        .catch(error => {
-            console.error('Error saving profile:', error.response ? error.response.data : error);
-            alert("An error occurred while saving your profile.");
-        });
+          axios.put(`/api/profile/${this.user.id}`, {
+              first_name: this.editableUser.first_name,
+              last_name: this.editableUser.last_name,
+              email: this.editableUser.email,
+              role: this.editableUser.role,
+              genre: this.editableUser.genre,
+          })
+          .then(response => {
+              this.editableUser = { ...response.data.user }; // Mise à jour avec les données du serveur
+              this.isEditing = false;
+              this.$refs.notification.showNotification('Profile updated successfully', 'success');
+          })
+          .catch(error => {
+              this.$refs.notification.showNotification('Error saving profile', 'error');
+              console.error('Error saving profile:', error.response ? error.response.data : error);
+          });
       } else {
-        this.isEditing = true;
+          this.isEditing = true;
       }
-    },
+  },
     openCvModal() {
       this.showCvModal = true;
     },
@@ -137,18 +142,18 @@ export default {
       formData.append("cv", this.cvFile);
 
       axios.post(`/api/profile/${this.user.id}/upload-cv`, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
+          headers: { "Content-Type": "multipart/form-data" }
       })
       .then(response => {
-        this.cvUrl = response.data.cvUrl;
-        alert("CV uploaded successfully!");
-        this.closeCvModal();
+          this.cvUrl = response.data.cvUrl;
+          this.$refs.notification.showNotification('CV uploaded successfully!', 'success');
+          this.closeCvModal();
       })
       .catch(error => {
-        console.error('Error uploading CV:', error);
-        alert("An error occurred while uploading the CV.");
+          this.$refs.notification.showNotification('Error uploading CV', 'error');
+          console.error('Error uploading CV:', error);
       });
-    },
+    }
   },
   watch: {
     user(newUser) {

@@ -5,6 +5,8 @@ import ExampleComponent from './components/ExampleComponent.vue';
 import LoginForm from './components/LoginForm.vue';
 import Profile from './components/Profile.vue';
 import axios from 'axios';
+import JobPostForm from './components/JobPostForm.vue';
+import Notification from './components/Notification.vue';
 
 const app = createApp({
     mounted() {
@@ -29,4 +31,6 @@ const app = createApp({
 app.component('example-component', ExampleComponent);
 app.component('login-form', LoginForm);
 app.component('profile', Profile);
+app.component('jobpost-form', JobPostForm);
+app.component('notification', Notification);
 app.mount('#app');

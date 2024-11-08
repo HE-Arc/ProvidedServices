@@ -3,9 +3,7 @@
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <!-- Notification pop-up -->
-                <div v-if="notification.show" :class="['notification', notification.type]" class="fade-in-out">
-                    {{ notification.message }}
-                </div>
+                <Notification ref="notification"/>
 
                 <div v-if="isRegistering">
                     <h2 class="text-center">Create an Account</h2>
@@ -103,8 +101,12 @@
 
 <script>
 import axios from 'axios';
+import Notification from './Notification.vue';
 
 export default {
+    components: {
+        Notification 
+    },
     data() {
         return {
             isRegistering: false, // Change entre login et inscription
@@ -125,22 +127,13 @@ export default {
         };
     },
     methods: {
-        showNotification(message, type) {
-            this.notification.message = message;
-            this.notification.type = type;
-            this.notification.show = true;
-
-            setTimeout(() => {
-                this.notification.show = false;
-            }, 5000); // Hide after 5 seconds
-        },
         login() {
             axios.post('/api/login', {
                 email: this.form.email,
                 password: this.form.password,
             })
             .then(response => {
-                this.showNotification('Login successful', 'success');
+                this.$refs.notification.showNotification('Login successful', 'success');
                 setTimeout(() => {
                     window.location.href = '/';
                 }, 1000); // Redirect after 1 second
@@ -148,15 +141,16 @@ export default {
             .catch(error => {
                 if (error.response && error.response.data.message) {
                     // Afficher l'erreur spécifique renvoyée par le backend
-                    this.showNotification(error.response.data.message, 'error');
+                    this.$refs.notification.showNotification(error.response.data.message, 'error');
                 } else {
-                    this.showNotification('An unknown error occurred', 'error');
+                    this.$refs.notification.showNotification('An unknown error occurred', 'error');
                 }
             });
         },
         register() {
             axios.post('/api/register', this.form)
             .then(response => {
+                this.$refs.notification.showNotification('Registration successful', 'success');
                 this.showNotification('Registration successful', 'success');
                 this.isRegistering = false;
             })
@@ -168,9 +162,9 @@ export default {
                     for (const field in errors) {
                         errorMessage += `${field}: ${errors[field].join(', ')}\n`;
                     }
-                    this.showNotification(errorMessage, 'error');
+                    this.$refs.notification.showNotification(errorMessage, 'error');
                 } else {
-                    this.showNotification('Error during registration', 'error');
+                    this.$refs.notification.showNotification('Error during registration', 'error');
                 }
             });
         }
@@ -179,5 +173,5 @@ export default {
 </script>
 
 <style scoped>
-/* Notification Styles */
+
 </style>
