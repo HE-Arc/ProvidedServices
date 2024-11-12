@@ -11,25 +11,25 @@
                         <!-- Email -->
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input v-model="form.email" type="email" class="form-control" required>
+                            <input v-model="form.email" type="email" class="form-control" id="email" required>
                         </div>
 
                         <!-- Prénom -->
                         <div class="mb-3">
                             <label for="first_name" class="form-label">First Name</label>
-                            <input v-model="form.first_name" type="text" class="form-control" required>
+                            <input v-model="form.first_name" type="text" class="form-control" id="first_name" required>
                         </div>
 
                         <!-- Nom -->
                         <div class="mb-3">
                             <label for="last_name" class="form-label">Last Name</label>
-                            <input v-model="form.last_name" type="text" class="form-control" required>
+                            <input v-model="form.last_name" type="text" class="form-control" id="last_name" required>
                         </div>
 
                         <!-- Genre -->
                         <div class="mb-3">
                             <label for="gender" class="form-label">Gender</label>
-                            <select v-model="form.gender" class="form-control" required>
+                            <select v-model="form.gender" class="form-control" id="gender" required>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
                             </select>
@@ -38,7 +38,7 @@
                         <!-- Rôle -->
                         <div class="mb-3">
                             <label for="role" class="form-label">Role</label>
-                            <select v-model="form.role" class="form-control" required>
+                            <select v-model="form.role" class="form-control" id="role" required>
                                 <option value="client">Client</option>
                                 <option value="prestataire">Provider</option>
                             </select>
@@ -47,13 +47,13 @@
                         <!-- Mot de passe -->
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input v-model="form.password" type="password" class="form-control" required>
+                            <input v-model="form.password" type="password" class="form-control" id="password" required>
                         </div>
 
                         <!-- Confirmation mot de passe -->
                         <div class="mb-3">
                             <label for="password_confirmation" class="form-label">Confirm Password</label>
-                            <input v-model="form.password_confirmation" type="password" class="form-control" required>
+                            <input v-model="form.password_confirmation" type="password" class="form-control" id="password_confirmation" required>
                         </div>
 
                         <!-- Bouton d'inscription -->
@@ -74,13 +74,13 @@
                         <!-- Email -->
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input v-model="form.email" type="email" class="form-control" required>
+                            <input v-model="form.email" type="email" class="form-control" id="email" required>
                         </div>
 
                         <!-- Mot de passe -->
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input v-model="form.password" type="password" class="form-control" required>
+                            <input v-model="form.password" type="password" class="form-control" id="password" required>
                         </div>
 
                         <!-- Bouton connexion -->
