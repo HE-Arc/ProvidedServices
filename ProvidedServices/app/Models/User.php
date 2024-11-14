@@ -25,4 +25,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password_hash', 'salt', 'remember_token',
     ];
+
+    public function skills()
+    {
+        return $this->belongsToMany(Skill::class);
+    }
 }
