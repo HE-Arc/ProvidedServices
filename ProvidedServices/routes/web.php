@@ -43,4 +43,18 @@ Route::get('/create-offer', [JobPostController::class, 'create'])->name('create.
 
 Route::post('/api/job_posts', [JobPostController::class, 'store'])->middleware('auth');
 
-Route::get('/api/skills', [SkillsController::class, 'index']);
+Route::get('/api/skills', [SkillsController::class, 'index'])->middleware('auth');
+
+Route::post('api/profile/{id}/upload-profile-picture', [ProfileController::class, 'uploadProfilePicture'])->middleware('auth');
+
+Route::get('api/profile/{id}/profile-picture', [ProfileController::class, 'getProfilePicture'])->middleware('auth');
+
+Route::delete('/api/profile/{id}/delete-cv', [ProfileController::class, 'deleteCv'])->middleware('auth');
+
+Route::get('api/profile/{id}/skills', [ProfileController::class, 'getSkills'])->middleware('auth');
+
+Route::post('api/profile/{user}/add-skill', [ProfileController::class, 'addSkill'])->middleware('auth');
+
+Route::delete('api/profile/{user}/remove-skill', [ProfileController::class, 'removeSkill'])->middleware('auth');
+
+Route::get('api/job-posts', [JobPostController::class, 'index']);

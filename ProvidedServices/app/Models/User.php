@@ -19,7 +19,8 @@ class User extends Authenticatable
         'last_name',
         'genre',
         'role',
-        'cv_path'
+        'cv_path',
+        'picture'
     ];
 
     protected $hidden = [
@@ -28,6 +29,6 @@ class User extends Authenticatable
 
     public function skills()
     {
-        return $this->belongsToMany(Skill::class);
+        return $this->belongsToMany(Skills::class, 'user_skills', 'user_id', 'skill_id');
     }
 }

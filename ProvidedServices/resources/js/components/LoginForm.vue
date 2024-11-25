@@ -58,7 +58,7 @@
 
                         <!-- Bouton d'inscription -->
                         <div class="mb-3">
-                            <button type="submit" class="btn btn-primary w-100">Register</button>
+                            <button type="submit" class="auth-btn">Register</button>
                         </div>
 
                         <!-- Bouton pour basculer vers la connexion -->
@@ -85,7 +85,7 @@
 
                         <!-- Bouton connexion -->
                         <div class="mb-3">
-                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                            <button type="submit" class="auth-btn">Login</button>
                         </div>
 
                         <!-- Lien pour s'inscrire -->
@@ -148,11 +148,18 @@ export default {
             });
         },
         register() {
+            // Vérification des mots de passe
+            if (this.form.password !== this.form.password_confirmation) {
+                this.$refs.notification.showNotification('Passwords do not match', 'error');
+                return; // Arrête l'exécution si les mots de passe ne correspondent pas
+            }
+
+            // Si les mots de passe correspondent, continue avec l'appel API pour l'inscription
             axios.post('/api/register', this.form)
             .then(response => {
                 this.$refs.notification.showNotification('Registration successful', 'success');
-                this.showNotification('Registration successful', 'success');
-                this.isRegistering = false;
+                // Connecte automatiquement l'utilisateur après l'inscription
+                this.login();
             })
             .catch(error => {
                 if (error.response && error.response.data.errors) {
