@@ -40,7 +40,7 @@
                             <label for="role" class="form-label">Role</label>
                             <select v-model="form.role" class="form-control" id="role" required>
                                 <option value="client">Client</option>
-                                <option value="prestataire">Provider</option>
+                                <option value="provider">Provider</option>
                             </select>
                         </div>
 

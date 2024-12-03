@@ -58,3 +58,11 @@ Route::post('api/profile/{user}/add-skill', [ProfileController::class, 'addSkill
 Route::delete('api/profile/{user}/remove-skill', [ProfileController::class, 'removeSkill'])->middleware('auth');
 
 Route::get('api/job-posts', [JobPostController::class, 'index']);
+
+Route::get('api/job-posts', [JobPostController::class, 'index']);
+
+Route::post('api/job-posts/{id}/apply', [JobPostController::class, 'apply']);
+
+Route::get('api/applied-jobs', [JobPostController::class, 'appliedJob']);
+
+Route::delete('api/job-posts/{id}/unapply', [JobPostController::class, 'unapply']);

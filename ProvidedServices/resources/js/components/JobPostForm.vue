@@ -31,7 +31,7 @@
         <textarea v-model="jobPost.description" id="description" required></textarea>
       </div>
 
-      <button type="submit">Create Job Post</button>
+      <button type="submit" class="btn-create-job-post">Create Job Post</button>
     </form>
   </div>
 </template>
