@@ -44,3 +44,12 @@ Route::get('/create-offer', [JobPostController::class, 'create'])->name('create.
 Route::post('/api/job_posts', [JobPostController::class, 'store'])->middleware('auth');
 
 Route::get('/api/skills', [SkillsController::class, 'index']);
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth']);
+
+
+Route::get('/client/job-posts', [JobPostController::class, 'getClientJobPosts']);
+
+Route::get('/provider/applications', [JobPostController::class, 'getProviderApplications']);
