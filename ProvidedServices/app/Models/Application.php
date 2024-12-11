@@ -18,7 +18,7 @@ class Application extends Model
     // Relation avec JobPost
     public function jobPost()
     {
-        return $this->belongsTo(JobPost::class);
+        return $this->belongsTo(JobPost::class, 'job_post_id');
     }
 
     // Relation avec User (prestataire)

@@ -1,5 +1,5 @@
 import './bootstrap';
-import '../css/app.css'; 
+import '../css/app.css';
 import { createApp } from 'vue';
 import ExampleComponent from './components/ExampleComponent.vue';
 import LoginForm from './components/LoginForm.vue';
@@ -7,6 +7,8 @@ import Profile from './components/Profile.vue';
 import axios from 'axios';
 import JobPostForm from './components/JobPostForm.vue';
 import Notification from './components/Notification.vue';
+import DashboardComponent from './components/Dashboard.vue';
+import Navbar from './components/Navbar.vue';
 
 const app = createApp({
     mounted() {
@@ -33,4 +35,6 @@ app.component('login-form', LoginForm);
 app.component('profile', Profile);
 app.component('jobpost-form', JobPostForm);
 app.component('notification', Notification);
+app.component('dashboard-component', DashboardComponent);
+app.component('Navbar', Navbar);
 app.mount('#app');

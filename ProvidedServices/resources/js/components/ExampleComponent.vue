@@ -1,21 +1,6 @@
 <template>
   <div>
-    <!-- En-tête avec photo de profil -->
-    <div class="header">
-      <div v-if="user" class="profile-menu">
-        <div class="profile-picture" id="smaller-profile-div" @click="toggleDropdown">
-          <img v-if="user.picture" :src="'/storage/' + user.picture" alt="Profile Picture" />
-          <img v-else src="/storage/images/default-avatar.png" alt="Default Avatar" />
-
-        </div>
-        <div v-if="dropdownOpen" class="dropdown">
-          <ul>
-            <li @click="goToProfile(user.id)">Profile</li>
-            <li @click="logout">Logout</li>
-          </ul>
-        </div>
-      </div>
-    </div>
+    <Navbar :user="user" />
 
     <!-- Notification pop-up -->
     <Notification ref="notification" />
@@ -23,7 +8,7 @@
     <!-- Liste des offres d'emploi -->
     <div class="job-posts-header">
       <h2>Job Posts</h2>
-      <button class="btn-add-job" @click="createOffer">
+      <button v-if="user && user.role === 'client'" class="btn-add-job" @click="createOffer">
         <span>+</span>
       </button>
     </div>
@@ -34,7 +19,7 @@
         <h3>{{ job.title }}</h3>
         <p><strong>Description: </strong>{{ job.description }}</p>
         <p>
-          <strong>Posted by: </strong> 
+          <strong>Posted by: </strong>
           <a :href="`/profile/${job.client.id}`">
             {{ job.client.first_name }} {{ job.client.last_name }}
           </a>
@@ -64,6 +49,7 @@
 <script>
 import axios from 'axios';
 import Notification from './Notification.vue';
+import Navbar from './Navbar.vue';
 
 export default {
   components: {
@@ -73,7 +59,7 @@ export default {
     return {
       user: null,
       jobPosts: [],
-      appliedJobs: [], 
+      appliedJobs: [],
       dropdownOpen: false,
     };
   },
@@ -145,7 +131,7 @@ export default {
         });
     },
     toggleDropdown() {
-      this.dropdownOpen = !this.dropdownOpen; 
+      this.dropdownOpen = !this.dropdownOpen;
     },
     goToProfile(userId) {
       window.location.href = `/profile/${userId}`;
@@ -190,5 +176,10 @@ export default {
 </script>
 
 <style scoped>
+body {
+  margin: 0;
+  padding: 0;
+}
+
 
 </style>

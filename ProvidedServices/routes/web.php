@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\JobPostController;
 use App\Http\Controllers\SkillsController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -66,3 +67,13 @@ Route::post('api/job-posts/{id}/apply', [JobPostController::class, 'apply']);
 Route::get('api/applied-jobs', [JobPostController::class, 'appliedJob']);
 
 Route::delete('api/job-posts/{id}/unapply', [JobPostController::class, 'unapply']);
+
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth']);
+
+Route::middleware('auth')->get('/api/client/job-posts', [JobPostController::class, 'getClientJobPosts']);
+
+Route::middleware('auth')->get('/api/provider/dashboard-applications', [JobPostController::class, 'getProviderDashboardApplications']);
+
+Route::post('api/job-posts/{id}/choose-provider', [JobPostController::class, 'chooseProvider'])->middleware('auth');
+
+Route::get('api/job-posts/{id}/applications', [JobPostController::class, 'getJobApplications'])->middleware('auth');

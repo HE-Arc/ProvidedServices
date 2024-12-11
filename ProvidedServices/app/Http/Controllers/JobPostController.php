@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\JobPost;
 use App\Models\Application;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+
 
 class JobPostController extends Controller
 {
@@ -20,13 +22,13 @@ class JobPostController extends Controller
     {
         // Vérifier que l'utilisateur est un provider
         $user = Auth::user();
-        
+
         if ($user->role !== 'provider') {
             return response()->json(['message' => 'You must be a provider to apply for a job.'], 403);
         }
 
         $jobPost = JobPost::findOrFail($id);
-        
+
         // Créer une nouvelle application pour ce job
         $application = Application::create([
             'job_post_id' => $jobPost->id,
@@ -46,11 +48,12 @@ class JobPostController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        // Récupérez les jobs auxquels l'utilisateur a postulé
-        $appliedJobs = Application::where('provider_id', $user->id)->pluck('job_post_id');
+        // Récupérer les annonces auxquelles l'utilisateur a postulé, avec les informations des compétences et du job post
+        $appliedJobs = Application::where('provider_id', $user->id)->pluck("job_post_id");
 
         return response()->json($appliedJobs);
     }
+
 
     public function unapply($id)
     {
@@ -113,4 +116,78 @@ class JobPostController extends Controller
 
         return response()->json(['job_post' => $jobPost, 'message' => 'Job post created successfully!'], 201);
     }
+
+    public function getClientJobPosts()
+    {
+        $clientId = Auth::id();
+        $jobPosts = JobPost::where('client_id', $clientId)->with('skills')->get();
+        return response()->json($jobPosts);
+    }
+
+    public function getProviderDashboardApplications()
+    {
+        $user = Auth::user();
+
+        // Vérifiez que l'utilisateur est un prestataire
+        if ($user->role !== 'provider') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Récupérer les candidatures avec les annonces et leurs compétences
+        $applications = Application::where('provider_id', $user->id)
+                        ->with(['jobPost.skills', 'jobPost.client']) // Charger les relations jobPost et skills
+                        ->get();
+
+        return response()->json($applications);
+    }
+
+    public function chooseProvider(Request $request, $jobPostId)
+    {
+        $user = Auth::user();
+
+        // Vérifiez que l'utilisateur est un client
+        if ($user->role !== 'client') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Vérifiez que l'annonce appartient à ce client
+        $jobPost = JobPost::where('id', $jobPostId)->where('client_id', $user->id)->first();
+        if (!$jobPost) {
+            return response()->json(['message' => 'Job post not found or unauthorized'], 404);
+        }
+
+        $providerId = $request->input('providerId');
+
+        // Mettez à jour le statut du prestataire sélectionné
+        Application::where('job_post_id', $jobPostId)
+            ->where('provider_id', $providerId)
+            ->update(['status' => 'accepted']);
+
+        return response()->json(['message' => 'Provider selected successfully']);
+    }
+
+    public function getJobApplications($jobPostId)
+{
+    $user = Auth::user();
+
+    // Vérifiez que l'utilisateur est un client
+    if ($user->role !== 'client') {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    // Vérifiez que l'annonce appartient à ce client
+    $jobPost = JobPost::where('id', $jobPostId)->where('client_id', $user->id)->first();
+    if (!$jobPost) {
+        return response()->json(['message' => 'Job post not found or unauthorized'], 404);
+    }
+
+    // Récupérer les candidatures avec les informations des prestataires
+    $applications = Application::where('job_post_id', $jobPostId)
+        ->with('provider') // Charge les données du prestataire
+        ->get();
+
+    return response()->json($applications);
+}
+
+
 }
