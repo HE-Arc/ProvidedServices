@@ -8,6 +8,8 @@ use App\Models\Application;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
+use App\Mail\ApplicationAcceptedMail;
+use Illuminate\Support\Facades\Mail;
 
 class JobPostController extends Controller
 {
@@ -167,27 +169,50 @@ class JobPostController extends Controller
     }
 
     public function getJobApplications($jobPostId)
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    // Vérifiez que l'utilisateur est un client
-    if ($user->role !== 'client') {
-        return response()->json(['message' => 'Unauthorized'], 403);
+        // Vérifiez que l'utilisateur est un client
+        if ($user->role !== 'client') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Vérifiez que l'annonce appartient à ce client
+        $jobPost = JobPost::where('id', $jobPostId)->where('client_id', $user->id)->first();
+        if (!$jobPost) {
+            return response()->json(['message' => 'Job post not found or unauthorized'], 404);
+        }
+
+        // Récupérer les candidatures avec les informations des prestataires
+        $applications = Application::where('job_post_id', $jobPostId)
+            ->with('provider') // Charge les données du prestataire
+            ->get();
+
+        return response()->json($applications);
     }
 
-    // Vérifiez que l'annonce appartient à ce client
-    $jobPost = JobPost::where('id', $jobPostId)->where('client_id', $user->id)->first();
-    if (!$jobPost) {
-        return response()->json(['message' => 'Job post not found or unauthorized'], 404);
+    public function updateApplicationStatus(Request $request, $applicationId)
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'client') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $application = Application::findOrFail($applicationId);
+
+        if ($application->jobPost->client_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $application->status = $request->input('status');
+        $application->save();
+
+        if ($application->status === 'accepted') {
+            $provider = $application->provider;
+            Mail::to($provider->email)->send(new ApplicationAcceptedMail($application));
+        }
+
+        return response()->json(['message' => 'Status updated successfully']);
     }
-
-    // Récupérer les candidatures avec les informations des prestataires
-    $applications = Application::where('job_post_id', $jobPostId)
-        ->with('provider') // Charge les données du prestataire
-        ->get();
-
-    return response()->json($applications);
-}
-
-
 }

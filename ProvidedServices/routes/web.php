@@ -77,3 +77,5 @@ Route::middleware('auth')->get('/api/provider/dashboard-applications', [JobPostC
 Route::post('api/job-posts/{id}/choose-provider', [JobPostController::class, 'chooseProvider'])->middleware('auth');
 
 Route::get('api/job-posts/{id}/applications', [JobPostController::class, 'getJobApplications'])->middleware('auth');
+
+Route::post('api/applications/{id}/update-status', [JobPostController::class, 'updateApplicationStatus'])->middleware('auth');

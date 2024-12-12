@@ -1,6 +1,5 @@
 <template>
     <div>
-        <!-- Inclusion de la Navbar, seulement si les données utilisateur sont disponibles -->
         <Navbar v-if="user" :user="user" />
 
         <!-- Contenu du Dashboard -->
@@ -36,23 +35,54 @@
                                 <button @click="viewApplications(job.id)" class="btn-view-applications">Voir les postulants</button>
                             </div>
 
-                            <!-- Liste des postulants -->
-                            <div v-if="selectedJobId === job.id">
-                                <h4>Postulants :</h4>
-                                <ul>
-                                    <li v-for="application in job.applications" :key="application.id" class="application-item">
-                                        <p><strong>Nom : </strong>{{ application.provider.first_name }} {{ application.provider.last_name }}</p>
-                                        <a :href="`/profile/${application.provider.id}`" target="_blank">Voir le profil</a>
-                                        <button @click="chooseProvider(application.provider.id, job.id)" class="btn-choose-provider">
-                                            Choisir ce prestataire
-                                        </button>
-                                    </li>
-                                </ul>
+                            <!-- Liste déroulante verticale pour les postulants -->
+                            <div v-if="selectedJobId === job.id" class="carousel-container-vertical">
+                                <div
+                                    v-for="application in job.applications"
+                                    :key="application.id"
+                                    class="carousel-item"
+                                >
+                                    <p><strong>Nom : </strong>{{ application.provider.first_name }} {{ application.provider.last_name }}</p>
+                                    <a :href="`/profile/${application.provider.id}`" target="_blank">Voir le profil</a>
+
+                                    <!-- Sélection des statuts -->
+                                    <div class="status-selector">
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="status-{{ application.id }}"
+                                                value="refused"
+                                                :checked="application.status === 'refused'"
+                                                @change="updateApplicationStatus(application.id, 'refused', job.id)"
+                                            />
+                                            <span class="status-refused">Refusé</span>
+                                        </label>
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="status-{{ application.id }}"
+                                                value="on hold"
+                                                :checked="application.status === 'on hold'"
+                                                @change="updateApplicationStatus(application.id, 'on hold', job.id)"
+                                            />
+                                            <span class="status-on-hold">En attente</span>
+                                        </label>
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="status-{{ application.id }}"
+                                                value="accepted"
+                                                :checked="application.status === 'accepted'"
+                                                @change="confirmAcceptApplication(application.id, job.id)"
+                                            />
+                                            <span class="status-accepted">Accepté</span>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!-- Vue si l'utilisateur est un prestataire -->
                 <div v-if="userRole === 'provider'">
                     <div class="header-container-centered">
@@ -148,7 +178,6 @@ export default {
         async fetchClientJobPosts() {
             try {
                 const response = await axios.get('/api/client/job-posts');
-                // Charger les applications de chaque job
                 const jobPosts = response.data;
                 for (const job of jobPosts) {
                     const applicationsResponse = await axios.get(`/api/job-posts/${job.id}/applications`);
@@ -200,9 +229,25 @@ export default {
                 alert('Une erreur s\'est produite lors de la désinscription. Veuillez réessayer.');
             }
         },
-        confirmUnapply(jobId) {
-            if (confirm('Êtes-vous sûr de vouloir vous désinscrire de cette annonce ?')) {
-                this.unapplyJob(jobId);
+            confirmUnapply(jobId) {
+                if (confirm('Êtes-vous sûr de vouloir vous désinscrire de cette annonce ?')) {
+                    this.unapplyJob(jobId);
+                }
+            },
+            async updateApplicationStatus(applicationId, status, jobId) {
+            try {
+                await axios.post(`/api/applications/${applicationId}/update-status`, { status });
+                const job = this.jobPosts.find((job) => job.id === jobId);
+                const application = job.applications.find((app) => app.id === applicationId);
+                application.status = status;
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour du statut:', error);
+                alert('Une erreur s\'est produite lors de la mise à jour du statut.');
+            }
+        },
+        confirmAcceptApplication(applicationId, jobId) {
+            if (confirm('En acceptant ce prestataire, il recevra un email de confirmation pour ce poste. Voulez-vous continuer ?')) {
+                this.updateApplicationStatus(applicationId, 'accepted', jobId);
             }
         }
     }
@@ -392,4 +437,72 @@ h2 {
     background-color: #cc0000;
 }
 
+.carousel-container-vertical {
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.carousel-item {
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for the status selector */
+.status-selector {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.status-selector label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.status-selector input {
+    display: none;
+}
+
+.status-selector .status-refused {
+    background-color: red;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.status-selector .status-on-hold {
+    background-color: orange;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.status-selector .status-accepted {
+    background-color: green;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+/* Highlight for the selected status */
+.status-selector input:checked + span {
+    box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.3);
+    font-weight: bold;
+    scale: 1.1;
+}
 </style>
