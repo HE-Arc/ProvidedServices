@@ -15,7 +15,7 @@ class JobPostController extends Controller
 {
     public function index()
     {
-        $jobPosts = JobPost::with('skills', 'client')->get();
+        $jobPosts = JobPost::with('skills', 'client')->orderBy('created_at', 'desc')->get();
         return response()->json($jobPosts);
     }
 
@@ -122,7 +122,7 @@ class JobPostController extends Controller
     public function getClientJobPosts()
     {
         $clientId = Auth::id();
-        $jobPosts = JobPost::where('client_id', $clientId)->with('skills')->get();
+        $jobPosts = JobPost::where('client_id', $clientId)->with('skills')->orderBy('created_at', 'desc')->get();
         return response()->json($jobPosts);
     }
 
@@ -138,34 +138,26 @@ class JobPostController extends Controller
         // Récupérer les candidatures avec les annonces et leurs compétences
         $applications = Application::where('provider_id', $user->id)
                         ->with(['jobPost.skills', 'jobPost.client']) // Charger les relations jobPost et skills
+                        ->orderBy('created_at', 'desc')
                         ->get();
 
         return response()->json($applications);
     }
 
-    public function chooseProvider(Request $request, $jobPostId)
+    public function chooseProvider(Request $request, $jobId)
     {
-        $user = Auth::user();
+        $jobPost = JobPost::findOrFail($jobId);
+        $provider = User::findOrFail($request->providerId);
 
-        // Vérifiez que l'utilisateur est un client
-        if ($user->role !== 'client') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        // Mettre à jour le statut du prestataire pour ce job
+        $jobPost->applications()
+                ->where('provider_id', $provider->id)
+                ->update(['status' => 'accepted']);
 
-        // Vérifiez que l'annonce appartient à ce client
-        $jobPost = JobPost::where('id', $jobPostId)->where('client_id', $user->id)->first();
-        if (!$jobPost) {
-            return response()->json(['message' => 'Job post not found or unauthorized'], 404);
-        }
+        // Envoyer un email au prestataire
+        \Mail::to($provider->email)->send(new \App\Mail\ProviderSelectedNotification($provider, $jobPost));
 
-        $providerId = $request->input('providerId');
-
-        // Mettez à jour le statut du prestataire sélectionné
-        Application::where('job_post_id', $jobPostId)
-            ->where('provider_id', $providerId)
-            ->update(['status' => 'accepted']);
-
-        return response()->json(['message' => 'Provider selected successfully']);
+        return response()->json(['message' => 'Prestataire sélectionné et notification envoyée.']);
     }
 
     public function getJobApplications($jobPostId)
@@ -209,8 +201,9 @@ class JobPostController extends Controller
         $application->save();
 
         if ($application->status === 'accepted') {
-            $provider = $application->provider;
-            Mail::to($provider->email)->send(new ApplicationAcceptedMail($application));
+            $provider = User::findOrFail($application->provider_id); // Remplacez par un ID valide
+            $jobPost = JobPost::findOrFail($application->job_post_id);
+            Mail::to($provider->email)->send(new ApplicationAcceptedMail($provider, $jobPost));
         }
 
         return response()->json(['message' => 'Status updated successfully']);

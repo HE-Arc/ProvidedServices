@@ -1,6 +1,7 @@
 <template>
+  <Navbar :user="user" />
+  <Notification ref="notification"/>
   <div class="container">
-    <Notification ref="notification"/>
     <h2>Create Job Post</h2>
     <form @submit.prevent="submitJobPost">
       <div class="mb-3">
@@ -39,6 +40,7 @@
 <script>
 import axios from 'axios';
 import Notification from './Notification.vue';
+import Navbar from './Navbar.vue';
 
 export default {
   components: {

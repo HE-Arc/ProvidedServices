@@ -46,7 +46,7 @@ body {
 
 .container {
   max-width: 600px;
-  margin: 0 auto;
+  margin: 15px auto;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
@@ -113,19 +113,21 @@ textarea {
   min-height: 150px;
 }
 
-/* Button Styles */
 .btn-add-job {
-  background-color: #007EA7; /* Bleu */
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 50%; /* Rond */
-  font-size: 18px; /* Plus grand pour ressembler à une icône */
-  cursor: pointer;
-  margin-left: 10px;
   display: flex;
-  align-items: center;
+  margin-left: 15px;
   justify-content: center;
+  align-items: center;
+  height: 35px;
+  width: 35px;
+  font-size: 20px;
+  font-weight: bold;
+  border: none;
+  border-radius: 50%;
+  background-color: #007EA7;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
 }
 
 .btn-add-job span {
@@ -357,7 +359,8 @@ button i:hover {
   text-align: center;
 }
 
-.btn-apply {
+.btn-apply, 
+.btn-view-applications {
   background-color: #007EA7; /* Vert */
   color: white;
   border: none;
@@ -366,7 +369,8 @@ button i:hover {
   cursor: pointer;
 }
 
-.btn-unapply {
+.btn-unapply,
+.btn-hide-applications {
   background-color: white; /* Fond blanc */
   color: #007EA7; /* Texte bleu */
   border: 2px solid #007EA7; /* Bordure de la même couleur que le bouton apply */
@@ -375,13 +379,15 @@ button i:hover {
   cursor: pointer;
 }
 
-.btn-unapply:hover {
+.btn-unapply:hover,
+.btn-hide-applications:hover {
   background-color: #007EA7; /* Fond bleu */
   color: white; /* Texte blanc */
   border-color: white; /* Bordure blanche */
 }
 
-.btn-apply:hover {
+.btn-apply:hover,
+.btn-view-applications:hover {
   background-color: #003459;
 }
 
@@ -664,3 +670,75 @@ a:hover {
   width: 40px;
   height: 40px;
 }
+
+.header-container-centered {
+  display: flex;
+  justify-content: center; /* Centrer horizontalement le conteneur */
+  align-items: center; /* Aligner verticalement les éléments */
+  gap: 10px; /* Espacement entre le titre et le bouton */
+  margin-bottom: 20px;
+  text-align: center; /* Centrer le texte */
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  margin-left: 5px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+/* Couleurs pour chaque statut */
+.i-on-hold {
+  background-color: orange;
+}
+
+.i-accepted {
+  background-color: green;
+}
+
+.i-refused {
+  background-color: red;
+}
+
+.carousel-container-vertical {
+  max-height: 300px;
+  max-width: 50%;
+  margin-left: 25%;
+  margin-top: 25px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.status-selector {
+  display: inline-flex;
+  gap: 15px;
+  align-items: center;
+  margin-left: 15px;
+  justify-content: flex-start;
+}
+
+.status-icon {
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.2s, color 0.2s;
+  color: gray; /* Couleur par défaut */
+}
+
+.status-icon.refused.active {
+  color: red; /* Couleur lorsqu'elle est active */
+}
+
+.status-icon.accepted.active {
+  color: green; /* Couleur lorsqu'elle est active */
+}
+
+.status-icon:hover {
+  transform: scale(1.1); /* Animation au survol */
+}
+
