@@ -113,7 +113,7 @@ export default {
     },
     fetchAppliedJobs() {
       axios
-        .get('/api/applied-jobs')
+        .get('api/applied-jobs')
         .then((response) => {
           this.appliedJobs = response.data;
         })

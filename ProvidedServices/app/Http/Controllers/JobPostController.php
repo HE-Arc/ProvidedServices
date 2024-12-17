@@ -15,12 +15,23 @@ class JobPostController extends Controller
 {
     public function index()
     {
-        $jobPosts = JobPost::with('skills', 'client')->orderBy('created_at', 'desc')->get();
+        $user = Auth::user();
+
+        $jobPosts = JobPost::with('skills', 'client')
+            ->when($user && $user->role === 'provider', function ($query) use ($user) {
+                $query->whereDoesntHave('applications', function ($q) use ($user) {
+                    $q->where('provider_id', $user->id)
+                    ->where('status', 'refused');
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return response()->json($jobPosts);
     }
 
     // Postuler à une offre d'emploi
-    public function apply($id)
+    public function storeApply($id)
     {
         // Vérifier que l'utilisateur est un provider
         $user = Auth::user();
@@ -57,7 +68,7 @@ class JobPostController extends Controller
     }
 
 
-    public function unapply($id)
+    public function destroyApply($id)
     {
         $user = Auth::user();
 
@@ -119,14 +130,14 @@ class JobPostController extends Controller
         return response()->json(['job_post' => $jobPost, 'message' => 'Annonce créée avec succès !'], 201);
     }
 
-    public function getClientJobPosts()
+    public function clientJobPosts()
     {
         $clientId = Auth::id();
         $jobPosts = JobPost::where('client_id', $clientId)->with('skills')->orderBy('created_at', 'desc')->get();
         return response()->json($jobPosts);
     }
 
-    public function getProviderDashboardApplications()
+    public function ProviderApplications()
     {
         $user = Auth::user();
 
@@ -160,7 +171,7 @@ class JobPostController extends Controller
         return response()->json(['message' => 'Prestataire sélectionné et notification envoyée.']);
     }
 
-    public function getJobApplications($jobPostId)
+    public function jobApplications($jobPostId)
     {
         $user = Auth::user();
 

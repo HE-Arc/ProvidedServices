@@ -126,7 +126,11 @@
                                 {{ translateStatus(application.status) }}
                             </p>
                             <div class="btn-container">
-                                <button class="btn-unapply" @click="confirmUnapply(application.job_post.id)">
+                                <button 
+                                    v-if="application.status !== 'refused'" 
+                                    class="btn-unapply" 
+                                    @click="confirmUnapply(application.job_post.id)"
+                                >
                                     Se désinscrire
                                 </button>
                             </div>

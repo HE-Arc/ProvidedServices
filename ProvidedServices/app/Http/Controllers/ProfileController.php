@@ -58,7 +58,7 @@ class ProfileController extends Controller
         ], 200);
     }
 
-    public function getCv($id)
+    public function showCv($id)
     {
         $user = User::findOrFail($id);
 
@@ -89,7 +89,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function getProfilePicture($id)
+    public function profilePicture($id)
     {
         $user = User::findOrFail($id);
 
@@ -117,17 +117,19 @@ class ProfileController extends Controller
         return response()->json(['error' => 'CV introuvable.'], 404);
     }
 
-    public function getSkills($id)
+    public function skills($id)
     {
         $user = User::findOrFail($id);
         return response()->json($user->skills);
     }
 
-    public function addSkill(Request $request, User $user)
+    public function addSkill(Request $request, $id)
     {
         $request->validate([
             'skill_id' => 'required|exists:skills,id',
         ]);
+
+        $user = User::findOrFail($id);
 
         $user->skills()->attach($request->skill_id);
 

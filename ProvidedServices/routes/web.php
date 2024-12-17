@@ -1,83 +1,69 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\JobPostController;
 use App\Http\Controllers\SkillsController;
 use App\Http\Controllers\DashboardController;
 
-Route::get('/', function () {
-    return view('home_page');
-})->middleware('auth');  // Protection de la route avec le middleware auth
+/*
+|--------------------------------------------------------------------------
+| Routes Web
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/login', function () {
-    return view('login'); // Vue de login VueJS
-})->name('login');
+// Page d'accueil protégée
+Route::middleware('auth')->group(function () {
+    Route::view('/', 'home_page');
 
-Route::post('api/register', [AuthController::class, 'register']);
-Route::post('api/login', [AuthController::class, 'login']);
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 
-Route::get('/api/auth-check', function () {
-    return response()->json(['authenticated' => Auth::check()]);
+    // Routes liées aux profils
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('{id}', [ProfileController::class, 'show'])->name('show');
+        Route::put('{id}', [ProfileController::class, 'update'])->name('update');
+        Route::post('{id}/upload-cv', [ProfileController::class, 'uploadCv']);
+        Route::delete('{id}/delete-cv', [ProfileController::class, 'deleteCv']);
+        Route::post('{id}/upload-profile-picture', [ProfileController::class, 'uploadProfilePicture']);
+        Route::get('{id}/profile-picture', [ProfileController::class, 'profilePicture']);
+        Route::get('{id}/cv', [ProfileController::class, 'showCv']);
+        Route::get('{id}/skills', [ProfileController::class, 'skills']);
+        Route::post('{id}/add-skill', [ProfileController::class, 'addSkill']);
+        Route::delete('{id}/remove-skill', [ProfileController::class, 'removeSkill']);
+    });
+
+    // Routes pour Job Posts
+    Route::prefix('api')->group(function () {
+        Route::resource('job-posts', JobPostController::class)->except(['edit', 'show', 'create']);
+
+        Route::get('applied-jobs', [JobPostController::class, 'appliedJob']);
+        Route::get('client/job-posts', [JobPostController::class, 'clientJobPosts']);
+        Route::get('job-posts/{id}/applications', [JobPostController::class, 'jobApplications'])
+        ->name('job-posts.applications');
+        Route::get('provider/dashboard-applications', [JobPostController::class, 'providerApplications']);
+        Route::post('job-posts/{id}/choose-provider', [JobPostController::class, 'chooseProvider']);
+        Route::post('applications/{id}/update-status', [JobPostController::class, 'updateApplicationStatus']);
+        Route::post('job-posts/{id}/apply', [JobPostController::class, 'storeApply']);
+        Route::delete('job-posts/{id}/unapply', [JobPostController::class, 'destroyApply']);
+    });
+    Route::middleware('auth')->get('/create-offer', [JobPostController::class, 'create'])->name('job-posts.create');
 });
 
-Route::post('/logout', function () {
-    Auth::logout();
-    return response()->json(['message' => 'Logout successful']);
-})->name('logout');
+// Authentification publique
+Route::get('/login', fn() => view('login'))->name('login');
+Route::post('/logout', fn() => Auth::logout() && response()->json(['message' => 'Logout successful']))->name('logout');
 
-Route::get('/api/user', function () {
-    return response()->json(Auth::user());
-})->middleware('auth');
+// API d'authentification
+Route::prefix('api')->group(function () {
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
+    Route::get('auth-check', fn() => response()->json(['authenticated' => Auth::check()]));
+    Route::get('user', fn() => response()->json(Auth::user()))->middleware('auth');
+});
 
-Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show')->middleware('auth');
-
-Route::put('/api/profile/{id}', [ProfileController::class, 'update'])->name('profile.update')->middleware('auth');
-
-Route::post('/api/profile/{id}/upload-cv', [ProfileController::class, 'uploadCv'])->middleware('auth');
-
-Route::get('/api/profile/{user_id}/cv', [ProfileController::class, 'getCv'])->middleware('auth');
-
-Route::get('/create-offer', [JobPostController::class, 'create'])->name('create.offer')->middleware('auth');
-
-Route::post('/api/job_posts', [JobPostController::class, 'store'])->middleware('auth');
-
-Route::get('/api/skills', [SkillsController::class, 'index'])->middleware('auth');
-
-Route::post('api/profile/{id}/upload-profile-picture', [ProfileController::class, 'uploadProfilePicture'])->middleware('auth');
-
-Route::get('api/profile/{id}/profile-picture', [ProfileController::class, 'getProfilePicture'])->middleware('auth');
-
-Route::delete('/api/profile/{id}/delete-cv', [ProfileController::class, 'deleteCv'])->middleware('auth');
-
-Route::get('api/profile/{id}/skills', [ProfileController::class, 'getSkills'])->middleware('auth');
-
-Route::post('api/profile/{user}/add-skill', [ProfileController::class, 'addSkill'])->middleware('auth');
-
-Route::delete('api/profile/{user}/remove-skill', [ProfileController::class, 'removeSkill'])->middleware('auth');
-
-Route::get('api/job-posts', [JobPostController::class, 'index']);
-
-Route::get('api/job-posts', [JobPostController::class, 'index']);
-
-Route::post('api/job-posts/{id}/apply', [JobPostController::class, 'apply']);
-
-Route::get('api/applied-jobs', [JobPostController::class, 'appliedJob']);
-
-Route::delete('api/job-posts/{id}/unapply', [JobPostController::class, 'unapply']);
-
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth']);
-
-Route::middleware('auth')->get('/api/client/job-posts', [JobPostController::class, 'getClientJobPosts']);
-
-Route::middleware('auth')->get('/api/provider/dashboard-applications', [JobPostController::class, 'getProviderDashboardApplications']);
-
-Route::post('api/job-posts/{id}/choose-provider', [JobPostController::class, 'chooseProvider'])->middleware('auth');
-
-Route::get('api/job-posts/{id}/applications', [JobPostController::class, 'getJobApplications'])->middleware('auth');
-
-Route::post('api/applications/{id}/update-status', [JobPostController::class, 'updateApplicationStatus'])->middleware('auth');
-
-Route::delete('api/job-posts/{id}', [JobPostController::class, 'destroy']);
+// Gestion des compétences
+Route::prefix('api')->middleware('auth')->group(function () {
+    Route::get('skills', [SkillsController::class, 'index']);
+});

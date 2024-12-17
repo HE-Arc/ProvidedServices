@@ -106,7 +106,7 @@ export default {
         skills: this.jobPost.skills.map(skill => skill.id),
       };
 
-      axios.post('/api/job_posts', jobPostData)
+      axios.post('/api/job-posts', jobPostData)
         .then(() => {
           this.$refs.notification.showNotification('Annonce créée avec succès !', 'success');
           this.resetForm();

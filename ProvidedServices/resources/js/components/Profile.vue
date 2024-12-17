@@ -180,7 +180,7 @@ export default {
           this.isSkillsListVisible = !this.isSkillsListVisible;
       },
       fetchUserCv() {
-          axios.get(`/api/profile/${this.user.id}/cv`)
+          axios.get(`/profile/${this.user.id}/cv`)
               .then(response => {
                   this.cvUrl = response.data.cvUrl;
               })
@@ -196,12 +196,13 @@ export default {
           const formData = new FormData();
           formData.append('profile_picture', file);
 
-          axios.post(`/api/profile/${this.user.id}/upload-profile-picture`, formData, {
+          axios.post(`/profile/${this.user.id}/upload-profile-picture`, formData, {
               headers: { 'Content-Type': 'multipart/form-data' }
           })
           .then(response => {
               this.profilePictureUrl = response.data.profilePictureUrl;
               this.$refs.notification.showNotification('Photo de profil mise à jour avec succès.', 'success');
+              window.location.reload();
           })
           .catch(error => {
               this.$refs.notification.showNotification('Erreur lors du téléchargement de la photo de profil.', 'error');
@@ -214,7 +215,7 @@ export default {
           const formData = new FormData();
           formData.append('cv', file);
 
-          axios.post(`/api/profile/${this.user.id}/upload-cv`, formData, {
+          axios.post(`/profile/${this.user.id}/upload-cv`, formData, {
               headers: { 'Content-Type': 'multipart/form-data' }
           })
           .then(response => {
@@ -226,7 +227,7 @@ export default {
           });
       },
       deleteCv() {
-          axios.delete(`/api/profile/${this.user.id}/delete-cv`)
+          axios.delete(`/profile/${this.user.id}/delete-cv`)
               .then(() => {
                   this.cvUrl = null;
                   this.$refs.notification.showNotification('CV supprimé avec succès.', 'success');
@@ -236,7 +237,7 @@ export default {
               });
       },
       fetchUserSkills() {
-          axios.get(`/api/profile/${this.user.id}/skills`)
+          axios.get(`/profile/${this.user.id}/skills`)
               .then(response => {
                   this.userSkills = response.data;
               })
@@ -255,7 +256,7 @@ export default {
               });
       },
       addSkill(skill) {
-          axios.post(`/api/profile/${this.user.id}/add-skill`, { skill_id: skill.id })
+          axios.post(`/profile/${this.user.id}/add-skill`, { skill_id: skill.id})
               .then(() => {
                   this.userSkills.push(skill);
                   this.availableSkills = this.availableSkills.filter(s => s.id !== skill.id);
@@ -266,7 +267,7 @@ export default {
               });
       },
       removeSkill(skill) {
-          axios.delete(`/api/profile/${this.user.id}/remove-skill`, { data: { skill_id: skill.id } })
+          axios.delete(`/profile/${this.user.id}/remove-skill`, { data: { skill_id: skill.id } })
               .then(() => {
                   this.userSkills = this.userSkills.filter(s => s.id !== skill.id);
                   this.availableSkills.push(skill);
@@ -278,7 +279,7 @@ export default {
       },
       toggleEditMode() {
           if (this.isEditing) {
-              axios.put(`/api/profile/${this.user.id}`, {
+              axios.put(`/profile/${this.user.id}`, {
                   first_name: this.editableUser.first_name,
                   last_name: this.editableUser.last_name
               })
