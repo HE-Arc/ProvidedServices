@@ -7,16 +7,6 @@
     <title>Dashboard</title>
     <!-- Inclusion des ressources Vue et CSS générées par Vite -->
     @vite(['resources/js/app.js', 'resources/css/app.css'])
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
-        #app {
-            margin: 0;
-            padding: 0;
-        }
-    </style>
 </head>
 <body>
     <!-- Script pour injecter des données globales à VueJS -->

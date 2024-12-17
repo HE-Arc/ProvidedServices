@@ -9,7 +9,7 @@ use App\Http\Controllers\SkillsController;
 use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home_page');
 })->middleware('auth');  // Protection de la route avec le middleware auth
 
 Route::get('/login', function () {
@@ -79,3 +79,5 @@ Route::post('api/job-posts/{id}/choose-provider', [JobPostController::class, 'ch
 Route::get('api/job-posts/{id}/applications', [JobPostController::class, 'getJobApplications'])->middleware('auth');
 
 Route::post('api/applications/{id}/update-status', [JobPostController::class, 'updateApplicationStatus'])->middleware('auth');
+
+Route::delete('api/job-posts/{id}', [JobPostController::class, 'destroy']);

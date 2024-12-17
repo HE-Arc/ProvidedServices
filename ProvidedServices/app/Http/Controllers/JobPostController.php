@@ -116,7 +116,7 @@ class JobPostController extends Controller
         // Associer les compétences (skills) à l'offre d'emploi
         $jobPost->skills()->sync($request->skills);
 
-        return response()->json(['job_post' => $jobPost, 'message' => 'Job post created successfully!'], 201);
+        return response()->json(['job_post' => $jobPost, 'message' => 'Annonce créée avec succès !'], 201);
     }
 
     public function getClientJobPosts()
@@ -207,5 +207,29 @@ class JobPostController extends Controller
         }
 
         return response()->json(['message' => 'Status updated successfully']);
+    }
+
+    public function destroy($id)
+    {
+        try {
+            // Récupérer le job_post
+            $jobPost = JobPost::findOrFail($id);
+
+            // Vérifiez si l'utilisateur est autorisé à supprimer
+            if (auth()->id() !== $jobPost->client_id) {
+                return response()->json(['message' => 'Vous n\'êtes pas autorisé à supprimer cette annonce.'], 403);
+            }
+
+            // Supprimer les relations associées
+            $jobPost->skills()->detach(); // Détache les compétences associées
+            $jobPost->applications()->delete(); // Supprime les candidatures associées
+
+            // Supprimer le job_post
+            $jobPost->delete();
+
+            return response()->json(['message' => 'Annonce supprimée avec succès.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la suppression de l\'annonce.', 'details' => $e->getMessage()], 500);
+        }
     }
 }

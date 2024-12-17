@@ -1,6 +1,7 @@
 <template>
     <div>
         <Navbar v-if="user" :user="user" />
+        <Notification ref="notification" />
 
         <!-- Contenu du Dashboard -->
         <div class="dashboard-content">
@@ -9,7 +10,7 @@
                 <!-- Vue si l'utilisateur est un client -->
                 <div v-if="userRole === 'client'">
                     <div class="header-container-centered">
-                        <h2>Vos Annonces Publiées</h2>
+                        <h2>Vos annonces publiées</h2>
                         <button class="btn-add-job" @click="createOffer">
                             <span>+</span>
                         </button>
@@ -18,9 +19,9 @@
                     <div v-else>
                         <div v-for="job in jobPosts" :key="job.id" class="job-post">
                             <h3>{{ job.title }}</h3>
-                            <p><strong>Description: </strong>{{ job.description }}</p>
+                            <p><strong>Description :</strong> {{ job.description }}</p>
                             <p v-if="job.skills && job.skills.length > 0">
-                                <strong>Compétences requises: </strong>
+                                <strong>Compétences requises :</strong>
                                 <span
                                     v-for="(skill, index) in job.skills"
                                     :key="index"
@@ -29,10 +30,10 @@
                                     {{ skill.name }}
                                 </span>
                             </p>
-                            <p><strong>Posté le: </strong>{{ new Date(job.created_at).toLocaleDateString() }}</p>
-                            <p><strong>Nombre de postulants: </strong>{{ job.applications?.length || 0 }}</p>
+                            <p><strong>Posté le :</strong> {{ new Date(job.created_at).toLocaleDateString() }}</p>
+                            <p><strong>Nombre de postulants :</strong> {{ job.applications?.length || 0 }}</p>
                             <div class="btn-container">
-                                <button
+                                <button v-if="job.applications && job.applications.length > 0"
                                     @click="viewApplications(job.id)"
                                     :class="{
                                         'btn-view-applications': selectedJobId !== job.id,
@@ -41,8 +42,13 @@
                                 >
                                     {{ selectedJobId === job.id ? 'Cacher les postulants' : 'Voir les postulants' }}
                                 </button>
+                                <button
+                                    class="btn-delete-job"
+                                    @click="openDeleteJobModal(job.id)"
+                                >
+                                    Supprimer
+                                </button>
                             </div>
-
                             <!-- Liste déroulante verticale pour les postulants -->
                             <div v-if="selectedJobId === job.id" class="carousel-container-vertical">
                                 <div
@@ -50,10 +56,10 @@
                                     :key="application.id"
                                     class="carousel-item"
                                 >
-                                <strong>Nom: </strong>
-                                <a :href="`/profile/${application.provider.id}`">
-                                    {{ application.provider.first_name }} {{ application.provider.last_name }}
-                                </a>
+                                    <strong>Nom :</strong>
+                                    <a :href="`/profile/${application.provider.id}`">
+                                        {{ application.provider.first_name }} {{ application.provider.last_name }}
+                                    </a>
 
                                     <!-- Sélection des statuts -->
                                     <div class="status-selector">
@@ -69,7 +75,7 @@
                                         <i
                                             class="fas fa-check-circle status-icon accepted"
                                             :class="{ active: application.status === 'accepted' }"
-                                            @click="confirmAcceptApplication(application.id, job.id)"
+                                            @click="openModal(application.id, application.provider, job)"
                                             title="Accepter"
                                         ></i>
                                     </div>
@@ -90,10 +96,10 @@
                                 {{ application.job_post.title }}
                             </h3>
                             <p v-if="application.job_post && application.job_post.description">
-                                <strong>Description: </strong>{{ application.job_post.description }}
+                                <strong>Description :</strong> {{ application.job_post.description }}
                             </p>
                             <p v-if="application.job_post && application.job_post.skills && application.job_post.skills.length > 0">
-                                <strong>Compétences requises: </strong>
+                                <strong>Compétences requises :</strong>
                                 <span
                                     v-for="(skill, index) in application.job_post.skills"
                                     :key="index"
@@ -103,12 +109,12 @@
                                 </span>
                             </p>
                             <p v-if="application.job_post && application.job_post.client">
-                                <strong>Posté par: </strong>
+                                <strong>Posté par :</strong>
                                 <a :href="`/profile/${application.job_post.client.id}`">
                                     {{ application.job_post.client.first_name }} {{ application.job_post.client.last_name }}
                                 </a>
                             </p>
-                            <p><strong>Statut: </strong>
+                            <p><strong>Statut :</strong>
                                 <span
                                     class="status-indicator"
                                     :class="{
@@ -117,7 +123,7 @@
                                         'i-refused': application.status === 'refused'
                                     }"
                                 ></span>
-                                {{ application.status }}
+                                {{ translateStatus(application.status) }}
                             </p>
                             <div class="btn-container">
                                 <button class="btn-unapply" @click="confirmUnapply(application.job_post.id)">
@@ -129,16 +135,60 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modale de suppression d'une annonce -->
+        <div v-if="showDeleteJobModal" class="modal-overlay">
+            <div class="modal">
+                <h2>Confirmer la suppression</h2>
+                <p>
+                    Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible.
+                </p>
+                <div class="modal-buttons">
+                    <button class="btn-cancel" @click="closeDeleteJobModal">Annuler</button>
+                    <button class="btn-confirm" @click="deleteJob">Confirmer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modale de désinscription -->
+        <div v-if="showUnapplyModal" class="modal-overlay">
+            <div class="modal">
+                <h2>Confirmer la désinscription</h2>
+                <p>
+                    Êtes-vous sûr de vouloir vous désinscrire de cette annonce ?
+                </p>
+                <div class="modal-buttons">
+                    <button class="btn-cancel" @click="closeUnapplyModal">Annuler</button>
+                    <button class="btn-confirm" @click="confirmUnapplyJob">Confirmer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modale de confirmation -->
+        <div v-if="showModal" class="modal-overlay">
+            <div class="modal">
+                <h2>Confirmer la sélection du prestataire</h2>
+                <p>
+                    Êtes-vous sûr de vouloir sélectionner <strong>{{ selectedProvider?.first_name }} {{ selectedProvider?.last_name }}</strong> pour l'annonce <strong>{{ selectedJob?.title }}</strong> ? Un mail lui sera envoyé.
+                </p>
+                <div class="modal-buttons">
+                    <button class="btn-cancel" @click="closeModal">Annuler</button>
+                    <button class="btn-confirm" @click="confirmProviderSelection(applicationId)">Confirmer</button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
 import Navbar from './Navbar.vue';
 import axios from 'axios';
+import Notification from './Notification.vue';
 
 export default {
     components: {
-        Navbar
+        Navbar,
+        Notification
     },
     data() {
         return {
@@ -147,7 +197,14 @@ export default {
             loading: true,
             jobPosts: [],
             applications: [],
-            selectedJobId: null
+            selectedJobId: null,
+            showModal: false,
+            selectedProvider: null, 
+            selectedJob: null,
+            showUnapplyModal: false,
+            unapplyJobId: null,
+            showDeleteJobModal: false,
+            jobIdToDelete: null,
         };
     },
     async created() {
@@ -160,12 +217,79 @@ export default {
         this.loading = false;
     },
     methods: {
+        translateStatus(status) {
+            const statusMap = {
+                'on hold': 'En attente',
+                'accepted': 'Accepté',
+                'refused': 'Refusé',
+            };
+            return statusMap[status] || status; // Retourne la traduction ou le statut original si non trouvé
+        },
+        openDeleteJobModal(jobId) {
+            this.jobIdToDelete = jobId;
+            this.showDeleteJobModal = true;
+        },
+        closeDeleteJobModal() {
+            this.jobIdToDelete = null;
+            this.showDeleteJobModal = false;
+        },
+        async deleteJob() {
+            try {
+                await axios.delete(`/api/job-posts/${this.jobIdToDelete}`);
+                this.jobPosts = this.jobPosts.filter(job => job.id !== this.jobIdToDelete);
+                this.$refs.notification.showNotification('Annonce supprimée avec succès.', 'success');
+            } catch (error) {
+                this.$refs.notification.showNotification(`Erreur : ${error.response?.data?.message || 'Une erreur s\'est produite lors de la suppression de l\'annonce.'}`, 'error');
+            } finally {
+                this.closeDeleteJobModal();
+            }
+        },
+        confirmUnapply(jobId) {
+            this.unapplyJobId = jobId;
+            this.showUnapplyModal = true;
+        },
+        closeUnapplyModal() {
+            this.unapplyJobId = null;
+            this.showUnapplyModal = false;
+        },
+        openModal(applicationId, provider, job) {
+            this.applicationId = applicationId
+            this.selectedProvider = provider;
+            this.selectedJob = job;
+            this.showModal = true;
+        },
+        closeModal() {
+            this.applicationId = null;
+            this.selectedProvider = null;
+            this.selectedJob = null;
+            this.showModal = false;
+        },
+        async unapplyJob(jobId) {
+            try {
+                await axios.delete(`/api/job-posts/${jobId}/unapply`);
+                this.applications = this.applications.filter(
+                    (application) => application.job_post.id !== jobId
+                );
+                this.$refs.notification.showNotification('Vous avez été désinscrit avec succès.', 'success');
+            } catch (error) {
+                this.$refs.notification.showNotification(`Erreur : ${error.response?.data?.message || 'Une erreur s\'est produite lors de la désinscription.'}`, 'error');
+            }
+        },
+        async confirmUnapplyJob() {
+            try {
+                await this.unapplyJob(this.unapplyJobId);
+            } catch (error) {
+                this.$refs.notification.showNotification(`Erreur : ${error.response?.data?.message || 'Une erreur s\'est produite lors de la désinscription.'}`, 'error');
+            } finally {
+                this.closeUnapplyModal();
+            }
+        },
         async fetchUser() {
             try {
                 const response = await axios.get('/api/user');
                 this.user = response.data;
             } catch (error) {
-                console.error('Erreur lors de la récupération des données utilisateur:', error);
+                this.$refs.notification.showNotification('Erreur lors de la récupération des données utilisateur.', 'error');
             }
         },
         async fetchClientJobPosts() {
@@ -178,71 +302,42 @@ export default {
                 }
                 this.jobPosts = jobPosts;
             } catch (error) {
-                console.error('Erreur lors de la récupération des annonces du client :', error);
+                this.$refs.notification.showNotification('Erreur lors de la récupération des annonces.', 'error');
             }
         },
         viewApplications(jobId) {
             this.selectedJobId = this.selectedJobId === jobId ? null : jobId;
         },
-        async chooseProvider(providerId, jobId) {
-            if (confirm('Êtes-vous sûr de vouloir sélectionner ce prestataire ?')) {
-                try {
-                    const response = await axios.post(`/api/job-posts/${jobId}/choose-provider`, {
-                        providerId
-                    });
-                    alert('Prestataire sélectionné avec succès.');
-                } catch (error) {
-                    console.error('Erreur lors de la sélection du prestataire :', error);
-                    alert('Une erreur s\'est produite lors de la sélection du prestataire.');
-                }
-            }
-        },
         async fetchProviderApplications() {
             try {
                 const response = await axios.get('/api/provider/dashboard-applications');
-                console.log('Applications reçues pour le tableau de bord :', response.data); // Log pour vérifier les données reçues
                 this.applications = response.data;
             } catch (error) {
-                console.error('Erreur lors de la récupération des candidatures du prestataire :', error);
+                this.$refs.notification.showNotification('Erreur lors de la récupération des candidatures.', 'error');
             }
         },
         createOffer() {
             window.location.href = '/create-offer';
         },
-        async unapplyJob(jobId) {
+        async confirmProviderSelection(applicationId) {
             try {
-                const response = await axios.delete(`/api/job-posts/${jobId}/unapply`);
-                console.log('Désinscription réussie:', response.data);
-                // Retirer l'application de la liste des applications
-                this.applications = this.applications.filter(
-                    (application) => application.job_post.id !== jobId
-                );
+                await this.updateApplicationStatus(applicationId, 'accepted', this.selectedJob.id);
+                this.closeModal();
+                this.$refs.notification.showNotification('Le prestataire a été sélectionné avec succès.', 'success');
             } catch (error) {
-                console.error('Erreur lors de la désinscription:', error);
-                alert('Une erreur s\'est produite lors de la désinscription. Veuillez réessayer.');
+                this.$refs.notification.showNotification(`Erreur : ${error.response?.data?.message || 'Une erreur s\'est produite.'}`, 'error');
             }
         },
-            confirmUnapply(jobId) {
-                if (confirm('Êtes-vous sûr de vouloir vous désinscrire de cette annonce ?')) {
-                    this.unapplyJob(jobId);
-                }
-            },
-            async updateApplicationStatus(applicationId, status, jobId) {
+        async updateApplicationStatus(applicationId, status, jobId) {
             try {
                 await axios.post(`/api/applications/${applicationId}/update-status`, { status });
                 const job = this.jobPosts.find((job) => job.id === jobId);
                 const application = job.applications.find((app) => app.id === applicationId);
                 application.status = status;
             } catch (error) {
-                console.error('Erreur lors de la mise à jour du statut:', error);
-                alert('Une erreur s\'est produite lors de la mise à jour du statut.');
+                this.$refs.notification.showNotification(`Erreur : ${error.response?.data?.message || 'Une erreur s\'est produite lors de la mise à jour du statut.'}`, 'error');
             }
         },
-        confirmAcceptApplication(applicationId, jobId) {
-            if (confirm('En acceptant ce prestataire, il recevra un email de confirmation pour ce poste. Voulez-vous continuer ?')) {
-                this.updateApplicationStatus(applicationId, 'accepted', jobId);
-            }
-        }
     }
 };
 </script>

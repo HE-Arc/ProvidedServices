@@ -6,7 +6,7 @@
 </head>
 <body>
     <div id="app">
-        <example-component></example-component>
+        <home-page></home-page>
     </div>
 </body>
 </html>

@@ -1,7 +1,7 @@
 import './bootstrap';
 import '../css/app.css';
 import { createApp } from 'vue';
-import ExampleComponent from './components/ExampleComponent.vue';
+import HomePage from './components/HomePage.vue';
 import LoginForm from './components/LoginForm.vue';
 import Profile from './components/Profile.vue';
 import axios from 'axios';
@@ -30,7 +30,7 @@ const app = createApp({
     }
 });
 
-app.component('example-component', ExampleComponent);
+app.component('home-page', HomePage);
 app.component('login-form', LoginForm);
 app.component('profile', Profile);
 app.component('jobpost-form', JobPostForm);

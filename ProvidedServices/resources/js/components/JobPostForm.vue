@@ -1,16 +1,20 @@
 <template>
-  <Navbar :user="user" />
+  <Navbar v-if="user" :user="user" />
   <Notification ref="notification"/>
+    
   <div class="container">
-    <h2>Create Job Post</h2>
+    <button class="back-button" @click="goBack" id="job-post-back">
+        <i class="fas fa-arrow-left"></i> Retour
+    </button>
+    <h2>Créer une annonce</h2>
     <form @submit.prevent="submitJobPost">
       <div class="mb-3">
-        <label for="title">Job Title</label>
-        <input type="text" v-model="jobPost.title" id="title" required />
+        <label for="title">Titre de l'annonce</label>
+        <input type="text" v-model="jobPost.title" id="title" required placeholder="Entrez le titre de l'annonce"/>
       </div>
 
       <div class="mb-3">
-        <label for="skills">Required Skills</label>
+        <label for="skills">Compétences requises</label>
         <ul class="skills-list">
           <li v-for="skill in availableSkills" :key="skill.id" @click="addSkill(skill)">
             {{ skill.name }}
@@ -19,7 +23,7 @@
       </div>
 
       <div class="mb-3">
-        <label>Selected Skills</label>
+        <label>Compétences sélectionnées</label>
         <ul class="selected-skills">
           <li v-for="skill in jobPost.skills" :key="skill.id" @click="removeSkill(skill)">
             {{ skill.name }} <span class="remove-btn">x</span>
@@ -29,10 +33,10 @@
 
       <div class="mb-3">
         <label for="description">Description</label>
-        <textarea v-model="jobPost.description" id="description" required></textarea>
+        <textarea v-model="jobPost.description" id="description" required placeholder="Entrez la description de l'annonce"></textarea>
       </div>
 
-      <button type="submit" class="btn-create-job-post">Create Job Post</button>
+      <button type="submit" class="btn-create-job-post">Créer l'annonce</button>
     </form>
   </div>
 </template>
@@ -44,7 +48,8 @@ import Navbar from './Navbar.vue';
 
 export default {
   components: {
-      Notification 
+      Notification, 
+      Navbar
   },
   data() {
     return {
@@ -53,54 +58,62 @@ export default {
         description: '',
         skills: [],
       },
+      user: null,
       skillsList: [],
       availableSkills: [],
-      notification: {
-        show: false,
-        message: '',
-        type: '' // 'success' or 'error'
-      }
     };
+  },
+  async created() {
+    await this.fetchUser();
   },
   mounted() {
     this.fetchSkills();
   },
   methods: {
+    async fetchUser() {
+        try {
+            const response = await axios.get('/api/user');
+            this.user = response.data;
+        } catch (error) {
+            this.$refs.notification.showNotification('Erreur lors de la récupération des données utilisateur.', 'error');
+        }
+    },
+    goBack() {
+      window.history.back();
+    },
     fetchSkills() {
       axios.get('/api/skills')
         .then(response => {
           this.skillsList = response.data;
-          this.availableSkills = [...this.skillsList]; // Clone pour gérer les compétences disponibles
+          this.availableSkills = [...this.skillsList];
         })
         .catch(error => {
-          console.error('Error fetching skills:', error);
-          this.$refs.notification.showNotification('Error fetching skills', 'error');
+          const errorMessage = error.response?.data?.message || 'Erreur lors de la récupération des compétences';
+          this.$refs.notification.showNotification(errorMessage, 'error');
         });
     },
     addSkill(skill) {
-      // Ajoute la compétence dans `jobPost.skills` et la retire de `availableSkills`
       this.jobPost.skills.push(skill);
       this.availableSkills = this.availableSkills.filter(s => s.id !== skill.id);
     },
     removeSkill(skill) {
-      // Retire la compétence de `jobPost.skills` et la remet dans `availableSkills`
       this.jobPost.skills = this.jobPost.skills.filter(s => s.id !== skill.id);
       this.availableSkills.push(skill);
     },
     submitJobPost() {
       const jobPostData = {
         ...this.jobPost,
-        skills: this.jobPost.skills.map(skill => skill.id), // Envoie seulement les IDs des compétences
+        skills: this.jobPost.skills.map(skill => skill.id),
       };
 
       axios.post('/api/job_posts', jobPostData)
-        .then(response => {
-          this.$refs.notification.showNotification('Job post created successfully!', 'success');
+        .then(() => {
+          this.$refs.notification.showNotification('Annonce créée avec succès !', 'success');
           this.resetForm();
         })
         .catch(error => {
-          console.error('Error creating job post:', error);
-          this.$refs.notification.showNotification('An error occurred while creating the job post.', 'error');
+          const errorMessage = error.response?.data?.message || 'Erreur lors de la création de l\'annonce';
+          this.$refs.notification.showNotification(errorMessage, 'error');
         });
     },
     resetForm() {
@@ -114,6 +127,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 
