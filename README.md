@@ -1,10 +1,8 @@
-# Projet web laravel
-
-# **ProvidedServices**
+# **Projet Web Laravel : ProvidedServices**
 
 ## **Description du projet**
 
-ProvidedServices est une application web permettant à des clients de publier des annonces pour rechercher des prestataires. Les prestataires peuvent postuler aux annonces, et les clients peuvent gérer les candidatures en acceptant ou refusant les prestataires. Une fois un prestataire accepté, un email de confirmation lui est envoyé.
+Provided Services est une application web permettant à des clients de publier des annonces pour rechercher des prestataires. Les prestataires peuvent postuler aux annonces, et les clients peuvent gérer les candidatures en acceptant ou refusant les prestataires. Une fois un prestataire accepté, un email de confirmation lui est envoyé.
 
 ## **Technologies utilisées**
 
@@ -19,7 +17,7 @@ ProvidedServices est une application web permettant à des clients de publier de
 
 Assurez-vous d'avoir installé les éléments suivants sur votre machine :
 
-1. [**PHP 8.x**](https://www.php.net/)
+1. [**PHP 8.1.x**](https://www.php.net/)
 2. [**Composer**](https://getcomposer.org/)
 3. [**Node.js** (et npm)](https://nodejs.org/)
 4. [**XAMPP**](https://www.apachefriends.org/) (ou un serveur local similaire)
@@ -44,6 +42,7 @@ cp .env.example .env
 
 2. **Configurer les informations de la base de données et du mail** dans le fichier `.env` :
 
+```
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -59,7 +58,7 @@ MAIL_PASSWORD="awff lzrs ylgn kjdv"
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=providedservicesapp@gmail.com
 MAIL_FROM_NAME="${APP_NAME}"
-
+```
 
 3. **Lancer XAMPP** et démarrer Apache et MySQL.
 
