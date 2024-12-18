@@ -138,13 +138,13 @@ textarea {
 }
 
 .btn-add-job:hover {
-  background-color: #003459; /* Bleu foncé */
+  background-color: #003459;
 }
 
 button, .btn-primary {
-  display: inline-block; /* Empêche les boutons de prendre toute la largeur */
-  padding: 8px 16px; /* Réduit le padding pour les boutons */
-  font-size: 0.9rem; /* Ajuste la taille de la police */
+  display: inline-block; 
+  padding: 8px 16px; 
+  font-size: 0.9rem; 
   text-align: center;
   background-color: #007EA7;
 }
@@ -203,15 +203,15 @@ button i:hover {
 }
 
 .auth-btn {
-  background-color: #007EA7; /* Couleur de fond bleu */
-  color: white; /* Texte blanc */
-  border: none; /* Pas de bordure */
-  padding: 10px 20px; /* Espacement intérieur du bouton */
-  font-size: 16px; /* Taille de la police */
-  width: 100%; /* Le bouton prend toute la largeur de son parent */
-  cursor: pointer; /* Le curseur devient une main lors du survol */
-  border-radius: 5px; /* Coins arrondis */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Animation douce */
+  background-color: #007EA7; 
+  color: white; 
+  border: none; 
+  padding: 10px 20px; 
+  font-size: 16px;
+  width: 100%; 
+  cursor: pointer; 
+  border-radius: 5px; 
+  transition: background-color 0.3s ease, transform 0.2s ease; 
 }
 
 #upload:hover {
@@ -219,13 +219,13 @@ button i:hover {
 }
 
 .auth-btn:hover {
-  background-color: #003459; /* Couleur de fond au survol (plus foncé) */
-  transform: scale(1.05); /* Légère animation d'agrandissement */
+  background-color: #003459; 
+  transform: scale(1.05); 
 }
 
 .auth-btn:focus {
-  outline: none; /* Enlever l'outline au focus */
-  box-shadow: 0 0 0 2px rgba(38, 143, 255, 0.5); /* Ombre de focus */
+  outline: none; 
+  box-shadow: 0 0 0 2px rgba(38, 143, 255, 0.5); 
 }
 
 .add-skill-button {
@@ -345,7 +345,7 @@ button i:hover {
 }
 
 .btn-create-job-post {
-  background-color: #007EA7; /* Vert */
+  background-color: #007EA7;
   color: white;
   border: none;
   padding: 10px 15px;
@@ -364,7 +364,7 @@ button i:hover {
 .btn-apply, 
 .btn-view-applications,
 .btn-confirm {
-  background-color: #007EA7; /* Vert */
+  background-color: #007EA7; 
   color: white;
   border: 2px solid #007EA7;
   padding: 10px 15px;
@@ -376,9 +376,9 @@ button i:hover {
 .btn-hide-applications,
 .btn-cancel,
 .btn-delete-job {
-  background-color: white; /* Fond blanc */
-  color: #007EA7; /* Texte bleu */
-  border: 2px solid #007EA7; /* Bordure de la même couleur que le bouton apply */
+  background-color: white; 
+  color: #007EA7; 
+  border: 2px solid #007EA7;
   padding: 10px 15px;
   border-radius: 5px;
   cursor: pointer;
@@ -392,9 +392,9 @@ button i:hover {
 .btn-hide-applications:hover,
 .btn-cancel:hover,
 .btn-delete-job:hover {
-  background-color: #007EA7; /* Fond bleu */
-  color: white; /* Texte blanc */
-  border-color: white; /* Bordure blanche */
+  background-color: #007EA7; 
+  color: white; 
+  border-color: white; 
 }
 
 .btn-apply:hover,
@@ -511,19 +511,19 @@ a:hover {
 /* Skills List Styles */
 .skill-bubble {
   display: inline-block;
-  background-color: #007EA7; /* Couleur de fond bleue */
+  background-color: #007EA7;
   color: white;
   padding: 6px 12px;
-  border-radius: 20px; /* Forme arrondie */
+  border-radius: 20px; 
   margin-right: 8px;
   margin-bottom: 8px;
-  font-size: 0.9rem; /* Taille de la police */
+  font-size: 0.9rem; 
   text-align: center;
   transition: background-color 0.3s;
 }
 
 .skill-bubble:hover {
-  background-color: #003459; /* Changer de couleur au survol */
+  background-color: #003459; 
 }
 
 .skills-section {
@@ -686,11 +686,11 @@ a:hover {
 
 .header-container-centered {
   display: flex;
-  justify-content: center; /* Centrer horizontalement le conteneur */
-  align-items: center; /* Aligner verticalement les éléments */
-  gap: 10px; /* Espacement entre le titre et le bouton */
+  justify-content: center;
+  align-items: center; 
+  gap: 10px; 
   margin-bottom: 20px;
-  text-align: center; /* Centrer le texte */
+  text-align: center; 
 }
 
 .status-indicator {
@@ -703,7 +703,6 @@ a:hover {
   vertical-align: middle;
 }
 
-/* Couleurs pour chaque statut */
 .i-on-hold {
   background-color: orange;
 }
@@ -740,19 +739,19 @@ a:hover {
   font-size: 24px;
   cursor: pointer;
   transition: transform 0.2s, color 0.2s;
-  color: gray; /* Couleur par défaut */
+  color: gray; 
 }
 
 .status-icon.refused.active {
-  color: red; /* Couleur lorsqu'elle est active */
+  color: red; 
 }
 
 .status-icon.accepted.active {
-  color: green; /* Couleur lorsqu'elle est active */
+  color: green; 
 }
 
 .status-icon:hover {
-  transform: scale(1.1); /* Animation au survol */
+  transform: scale(1.1); 
 }
 
 .modal-overlay {
@@ -823,4 +822,25 @@ a:hover {
 
 .profile-menu {
   position: relative;
+}
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.app-logo {
+  width: 20%; 
+  height: auto;
+  margin-top: 10px;
+}
+
+.app-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333; 
+  margin-top: -100px;
 }

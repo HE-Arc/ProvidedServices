@@ -44,7 +44,7 @@ Route::middleware('auth')->group(function () {
         ->name('job-posts.applications');
         Route::get('provider/dashboard-applications', [JobPostController::class, 'providerApplications']);
         Route::post('job-posts/{id}/choose-provider', [JobPostController::class, 'chooseProvider']);
-        Route::post('applications/{id}/update-status', [JobPostController::class, 'updateApplicationStatus']);
+        Route::post('applications/{jobPostId}/{providerId}/update-status', [JobPostController::class, 'updateApplicationStatus']);
         Route::post('job-posts/{id}/apply', [JobPostController::class, 'storeApply']);
         Route::delete('job-posts/{id}/unapply', [JobPostController::class, 'destroyApply']);
     });

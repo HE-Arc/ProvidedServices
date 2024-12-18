@@ -1,4 +1,8 @@
 <template>
+    <div v-if="!isRegistering" class="app-header text-center mb-4">
+        <img src="/storage/images/logoProvidedServicesSansTxt.png" alt="Logo Provided Services" class="app-logo" />
+        <h1 class="app-title">Provided Services</h1>
+    </div>
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
@@ -131,24 +135,21 @@ export default {
             }
 
             axios.post('/api/register', this.form)
-            .then(() => {
-                this.$refs.notification.showNotification('Inscription réussie. Vous allez être connecté.', 'success');
-                this.login();
-            })
-            .catch(error => {
-                if (error.response?.data?.errors) {
-                    const errors = error.response.data.errors;
-                    let errorMessage = 'Erreurs rencontrées :\n';
-                    for (const field in errors) {
-                        errorMessage += `${field} : ${errors[field].join(', ')}\n`;
+                .then(() => {
+                    this.$refs.notification.showNotification('Inscription réussie. Vous allez être connecté.', 'success');
+                    this.login(); 
+                })
+                .catch(error => {
+                    if (error.response?.data?.errors) {
+                        // Concaténer les erreurs dans une chaîne lisible
+                        const errorMessage = error.response.data.errors.join('\n');
+                        this.$refs.notification.showNotification(`Erreurs :\n${errorMessage}`, 'error');
+                    } else {
+                        const message = error.response?.data?.message || 'Une erreur inconnue est survenue.';
+                        this.$refs.notification.showNotification(`Erreur lors de l'inscription : ${message}`, 'error');
                     }
-                    this.$refs.notification.showNotification(errorMessage, 'error');
-                } else {
-                    const message = error.response?.data?.message || 'Une erreur inconnue est survenue.';
-                    this.$refs.notification.showNotification(`Erreur lors de l'inscription : ${message}`, 'error');
-                }
-            });
-        }
+                });
+        },
     }
 };
 </script>

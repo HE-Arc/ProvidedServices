@@ -42,10 +42,19 @@ class AuthController extends Controller
             'last_name' => 'required|string|max:255',
             'gender' => 'required|string',
             'role' => 'required|string|max:50',
+        ], [], [
+            'email' => 'adresse e-mail',
+            'password' => 'mot de passe',
+            'first_name' => 'prénom',
+            'last_name' => 'nom',
+            'gender' => 'genre',
+            'role' => 'rôle',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['erreurs' => $validator->errors()], 422);
+            return response()->json([
+                'errors' => $validator->errors()->all()
+            ], 422);
         }
 
         $salt = Str::random(16);

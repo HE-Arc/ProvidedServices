@@ -51,11 +51,7 @@
                             </div>
                             <!-- Liste déroulante verticale pour les postulants -->
                             <div v-if="selectedJobId === job.id" class="carousel-container-vertical">
-                                <div
-                                    v-for="application in job.applications"
-                                    :key="application.id"
-                                    class="carousel-item"
-                                >
+                                <div v-for="application in job.applications" :key="application.provider_id" class="carousel-item">
                                     <strong>Nom :</strong>
                                     <a :href="`/profile/${application.provider.id}`">
                                         {{ application.provider.first_name }} {{ application.provider.last_name }}
@@ -63,21 +59,15 @@
 
                                     <!-- Sélection des statuts -->
                                     <div class="status-selector">
-                                        <!-- Icône pour refuser -->
-                                        <i
-                                            class="fas fa-times-circle status-icon refused"
+                                        <i class="fas fa-times-circle status-icon refused"
                                             :class="{ active: application.status === 'refused' }"
-                                            @click="updateApplicationStatus(application.id, 'refused', job.id)"
-                                            title="Refuser"
-                                        ></i>
+                                            @click="updateApplicationStatus(application.job_post_id, application.provider_id, 'refused')"
+                                            title="Refuser"></i>
 
-                                        <!-- Icône pour accepter -->
-                                        <i
-                                            class="fas fa-check-circle status-icon accepted"
+                                        <i class="fas fa-check-circle status-icon accepted"
                                             :class="{ active: application.status === 'accepted' }"
-                                            @click="openModal(application.id, application.provider, job)"
-                                            title="Accepter"
-                                        ></i>
+                                            @click="openModal(job.id, application.provider)"
+                                            title="Accepter"></i>
                                     </div>
                                 </div>
                             </div>
@@ -91,7 +81,7 @@
                     </div>
                     <div v-if="applications.length === 0">Vous n'avez postulé à aucune annonce.</div>
                     <div v-else>
-                        <div v-for="application in applications" :key="application.id" class="job-post">
+                        <div v-for="application in applications" :key="application.job_post_id" class="job-post">
                             <h3 v-if="application.job_post && application.job_post.title">
                                 {{ application.job_post.title }}
                             </h3>
@@ -177,7 +167,7 @@
                 </p>
                 <div class="modal-buttons">
                     <button class="btn-cancel" @click="closeModal">Annuler</button>
-                    <button class="btn-confirm" @click="confirmProviderSelection(applicationId)">Confirmer</button>
+                    <button class="btn-confirm" @click="confirmProviderSelection()">Confirmer</button>
                 </div>
             </div>
         </div>
@@ -227,7 +217,7 @@ export default {
                 'accepted': 'Accepté',
                 'refused': 'Refusé',
             };
-            return statusMap[status] || status; // Retourne la traduction ou le statut original si non trouvé
+            return statusMap[status] || status; 
         },
         openDeleteJobModal(jobId) {
             this.jobIdToDelete = jobId;
@@ -248,42 +238,39 @@ export default {
                 this.closeDeleteJobModal();
             }
         },
-        confirmUnapply(jobId) {
-            this.unapplyJobId = jobId;
+        confirmUnapply(jobPostId) {
+            this.unapplyJobId = jobPostId;
             this.showUnapplyModal = true;
         },
         closeUnapplyModal() {
             this.unapplyJobId = null;
             this.showUnapplyModal = false;
         },
-        openModal(applicationId, provider, job) {
-            this.applicationId = applicationId
-            this.selectedProvider = provider;
-            this.selectedJob = job;
+        openModal(jobId, provider) {
             this.showModal = true;
+            this.selectedProvider = provider;
+            this.selectedJobIdForModal = jobId;
         },
         closeModal() {
-            this.applicationId = null;
-            this.selectedProvider = null;
-            this.selectedJob = null;
             this.showModal = false;
+            this.selectedProvider = null;
+            this.selectedJobIdForModal = null;
         },
-        async unapplyJob(jobId) {
+        async unapplyJob(jobPostId) {
             try {
-                await axios.delete(`/api/job-posts/${jobId}/unapply`);
-                this.applications = this.applications.filter(
-                    (application) => application.job_post.id !== jobId
-                );
+                await axios.delete(`/api/job-posts/${jobPostId}/unapply`);
+                this.applications = this.applications.filter(app => app.job_post_id !== jobPostId);
                 this.$refs.notification.showNotification('Vous avez été désinscrit avec succès.', 'success');
             } catch (error) {
-                this.$refs.notification.showNotification(`Erreur : ${error.response?.data?.message || 'Une erreur s\'est produite lors de la désinscription.'}`, 'error');
+                this.$refs.notification.showNotification(
+                    `Erreur lors de la désinscription : ${error.response?.data?.message || 'Une erreur est survenue.'}`,
+                    'error'
+                );
             }
         },
         async confirmUnapplyJob() {
             try {
                 await this.unapplyJob(this.unapplyJobId);
-            } catch (error) {
-                this.$refs.notification.showNotification(`Erreur : ${error.response?.data?.message || 'Une erreur s\'est produite lors de la désinscription.'}`, 'error');
             } finally {
                 this.closeUnapplyModal();
             }
@@ -323,23 +310,31 @@ export default {
         createOffer() {
             window.location.href = '/create-offer';
         },
-        async confirmProviderSelection(applicationId) {
+        async confirmProviderSelection() {
             try {
-                await this.updateApplicationStatus(applicationId, 'accepted', this.selectedJob.id);
+                await axios.post(`/api/job-posts/${this.selectedJobIdForModal}/choose-provider`, {
+                    providerId: this.selectedProvider.id,
+                });
                 this.closeModal();
+                await this.fetchClientJobPosts();
                 this.$refs.notification.showNotification('Le prestataire a été sélectionné avec succès.', 'success');
             } catch (error) {
-                this.$refs.notification.showNotification(`Erreur : ${error.response?.data?.message || 'Une erreur s\'est produite.'}`, 'error');
+                this.$refs.notification.showNotification(
+                    `Erreur lors de la sélection du prestataire : ${error.response?.data?.message || 'Une erreur est survenue.'}`,
+                    'error'
+                );
             }
         },
-        async updateApplicationStatus(applicationId, status, jobId) {
+        async updateApplicationStatus(jobPostId, providerId, status) {
             try {
-                await axios.post(`/api/applications/${applicationId}/update-status`, { status });
-                const job = this.jobPosts.find((job) => job.id === jobId);
-                const application = job.applications.find((app) => app.id === applicationId);
-                application.status = status;
+                await axios.post(`/api/applications/${jobPostId}/${providerId}/update-status`, { status });
+                await this.fetchClientJobPosts();
+                this.$refs.notification.showNotification('Statut mis à jour avec succès.', 'success');
             } catch (error) {
-                this.$refs.notification.showNotification(`Erreur : ${error.response?.data?.message || 'Une erreur s\'est produite lors de la mise à jour du statut.'}`, 'error');
+                this.$refs.notification.showNotification(
+                    `Erreur lors de la mise à jour du statut : ${error.response?.data?.message || 'Une erreur est survenue.'}`,
+                    'error'
+                );
             }
         },
     }

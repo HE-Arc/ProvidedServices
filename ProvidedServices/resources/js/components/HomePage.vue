@@ -193,5 +193,5 @@ export default {
 </script>
 
 <style scoped>
-/* Ajoutez vos styles ici */
+
 </style>
