@@ -83,7 +83,7 @@ php artisan key:generate
 php artisan migrate
 ```
 
-2. **Insérer des données d'exemple** (optionnel mais utile) :
+2. **Insérer les données** :
 
 ```bash
 php artisan db:seed
@@ -108,8 +108,6 @@ php artisan serve
 ```bash
 npm run dev
 ```
-
----
 
 ### **Accès à l'application**
 
@@ -151,7 +149,6 @@ Assurez-vous que les paramètres d'email sont correctement configurés dans le f
 - **Vues Blade** : `resources/views`  
    - Contient les vues pour les emails et le layout global.
 
----
 
 ## **Problèmes courants**
 
