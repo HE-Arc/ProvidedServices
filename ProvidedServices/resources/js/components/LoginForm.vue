@@ -1,96 +1,86 @@
 <template>
+    <div v-if="!isRegistering" class="app-header text-center mb-4">
+        <img src="/storage/images/logoProvidedServicesSansTxt.png" alt="Logo Provided Services" class="app-logo" />
+        <h1 class="app-title">Provided Services</h1>
+    </div>
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <!-- Notification pop-up -->
-                <Notification ref="notification"/>
+                <Notification ref="notification" />
 
                 <div v-if="isRegistering">
-                    <h2 class="text-center">Create an Account</h2>
+                    <h2 class="text-center">Créer un compte</h2>
                     <form @submit.prevent="register">
-                        <!-- Email -->
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input v-model="form.email" type="email" class="form-control" id="email" required>
                         </div>
 
-                        <!-- Prénom -->
                         <div class="mb-3">
-                            <label for="first_name" class="form-label">First Name</label>
+                            <label for="first_name" class="form-label">Prénom</label>
                             <input v-model="form.first_name" type="text" class="form-control" id="first_name" required>
                         </div>
 
-                        <!-- Nom -->
                         <div class="mb-3">
-                            <label for="last_name" class="form-label">Last Name</label>
+                            <label for="last_name" class="form-label">Nom</label>
                             <input v-model="form.last_name" type="text" class="form-control" id="last_name" required>
                         </div>
 
-                        <!-- Genre -->
                         <div class="mb-3">
-                            <label for="gender" class="form-label">Gender</label>
+                            <label for="gender" class="form-label">Genre</label>
                             <select v-model="form.gender" class="form-control" id="gender" required>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
+                                <option value="male">Homme</option>
+                                <option value="female">Femme</option>
                             </select>
                         </div>
 
-                        <!-- Rôle -->
                         <div class="mb-3">
-                            <label for="role" class="form-label">Role</label>
+                            <label for="role" class="form-label">Rôle</label>
                             <select v-model="form.role" class="form-control" id="role" required>
                                 <option value="client">Client</option>
-                                <option value="provider">Provider</option>
+                                <option value="provider">Prestataire</option>
                             </select>
                         </div>
 
-                        <!-- Mot de passe -->
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
+                            <label for="password" class="form-label">Mot de passe</label>
                             <input v-model="form.password" type="password" class="form-control" id="password" required>
                         </div>
 
-                        <!-- Confirmation mot de passe -->
                         <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Confirm Password</label>
+                            <label for="password_confirmation" class="form-label">Confirmez le mot de passe</label>
                             <input v-model="form.password_confirmation" type="password" class="form-control" id="password_confirmation" required>
                         </div>
 
-                        <!-- Bouton d'inscription -->
                         <div class="mb-3">
-                            <button type="submit" class="auth-btn">Register</button>
+                            <button type="submit" class="auth-btn">S'inscrire</button>
                         </div>
 
-                        <!-- Bouton pour basculer vers la connexion -->
                         <p class="text-center">
-                            Already have an account? <a href="#" @click.prevent="isRegistering = false">Login here</a>
+                            Vous avez déjà un compte ? <a href="#" @click.prevent="isRegistering = false">Connectez-vous ici</a>
                         </p>
                     </form>
                 </div>
 
                 <div v-else>
-                    <h2 class="text-center">Login</h2>
+                    <h2 class="text-center">Connexion</h2>
                     <form @submit.prevent="login">
-                        <!-- Email -->
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input v-model="form.email" type="email" class="form-control" id="email" required>
                         </div>
 
-                        <!-- Mot de passe -->
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
+                            <label for="password" class="form-label">Mot de passe</label>
                             <input v-model="form.password" type="password" class="form-control" id="password" required>
                         </div>
 
-                        <!-- Bouton connexion -->
                         <div class="mb-3">
-                            <button type="submit" class="auth-btn">Login</button>
+                            <button type="submit" class="auth-btn">Se connecter</button>
                         </div>
 
-                        <!-- Lien pour s'inscrire -->
                         <p class="text-center">
-                            Don't have an account? <a href="#" @click.prevent="isRegistering = true">Create one here</a>
+                            Vous n'avez pas de compte ? <a href="#" @click.prevent="isRegistering = true">Créez-en un ici</a>
                         </p>
                     </form>
                 </div>
@@ -109,7 +99,7 @@ export default {
     },
     data() {
         return {
-            isRegistering: false, // Change entre login et inscription
+            isRegistering: false,
             form: {
                 email: '',
                 first_name: '',
@@ -118,11 +108,6 @@ export default {
                 role: 'client',
                 password: '',
                 password_confirmation: ''
-            },
-            notification: {
-                show: false,
-                message: '',
-                type: '' // 'success' or 'error'
             }
         };
     },
@@ -130,55 +115,44 @@ export default {
         login() {
             axios.post('/api/login', {
                 email: this.form.email,
-                password: this.form.password,
+                password: this.form.password
             })
-            .then(response => {
-                this.$refs.notification.showNotification('Login successful', 'success');
+            .then(() => {
+                this.$refs.notification.showNotification('Connexion réussie.', 'success');
                 setTimeout(() => {
                     window.location.href = '/';
-                }, 1000); // Redirect after 1 second
+                }, 1000);
             })
             .catch(error => {
-                if (error.response && error.response.data.message) {
-                    // Afficher l'erreur spécifique renvoyée par le backend
-                    this.$refs.notification.showNotification(error.response.data.message, 'error');
-                } else {
-                    this.$refs.notification.showNotification('An unknown error occurred', 'error');
-                }
+                const message = error.response?.data?.message || 'Une erreur inconnue est survenue.';
+                this.$refs.notification.showNotification(`Erreur de connexion : ${message}`, 'error');
             });
         },
         register() {
-            // Vérification des mots de passe
             if (this.form.password !== this.form.password_confirmation) {
-                this.$refs.notification.showNotification('Passwords do not match', 'error');
-                return; // Arrête l'exécution si les mots de passe ne correspondent pas
+                this.$refs.notification.showNotification('Les mots de passe ne correspondent pas.', 'error');
+                return;
             }
 
-            // Si les mots de passe correspondent, continue avec l'appel API pour l'inscription
             axios.post('/api/register', this.form)
-            .then(response => {
-                this.$refs.notification.showNotification('Registration successful', 'success');
-                // Connecte automatiquement l'utilisateur après l'inscription
-                this.login();
-            })
-            .catch(error => {
-                if (error.response && error.response.data.errors) {
-                    // Afficher les erreurs de validation spécifiques
-                    const errors = error.response.data.errors;
-                    let errorMessage = 'Please fix the following errors:\n';
-                    for (const field in errors) {
-                        errorMessage += `${field}: ${errors[field].join(', ')}\n`;
+                .then(() => {
+                    this.$refs.notification.showNotification('Inscription réussie. Vous allez être connecté.', 'success');
+                    this.login(); 
+                })
+                .catch(error => {
+                    if (error.response?.data?.errors) {
+                        // Concaténer les erreurs dans une chaîne lisible
+                        const errorMessage = error.response.data.errors.join('\n');
+                        this.$refs.notification.showNotification(`Erreurs :\n${errorMessage}`, 'error');
+                    } else {
+                        const message = error.response?.data?.message || 'Une erreur inconnue est survenue.';
+                        this.$refs.notification.showNotification(`Erreur lors de l'inscription : ${message}`, 'error');
                     }
-                    this.$refs.notification.showNotification(errorMessage, 'error');
-                } else {
-                    this.$refs.notification.showNotification('Error during registration', 'error');
-                }
-            });
-        }
+                });
+        },
     }
 };
 </script>
 
 <style scoped>
-
 </style>

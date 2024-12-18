@@ -11,16 +11,18 @@ class ApplicationAcceptedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $application;
+    public $provider;
+    public $jobPost;
 
     /**
      * Create a new message instance.
      *
      * @param $application
      */
-    public function __construct($application)
+    public function __construct($provider, $jobPost)
     {
-        $this->application = $application;
+        $this->provider = $provider;
+        $this->jobPost = $jobPost;
     }
 
     /**
@@ -31,6 +33,10 @@ class ApplicationAcceptedMail extends Mailable
     public function build()
     {
         return $this->subject('Votre candidature a été acceptée')
-                    ->view('emails.application_accepted');
+                    ->view('emails.application_accepted')
+                    ->with([
+                        'provider' => $this->provider,
+                        'jobPost' => $this->jobPost,
+                    ]);
     }
 }

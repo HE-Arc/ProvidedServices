@@ -15,6 +15,10 @@ class Application extends Model
         'status',
     ];
 
+    public $incrementing = false;
+
+    protected $primaryKey = ['job_post_id', 'provider_id'];
+
     // Relation avec JobPost
     public function jobPost()
     {
