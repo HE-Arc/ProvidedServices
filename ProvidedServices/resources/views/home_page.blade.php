@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Laravel with Vue and Vite</title>
+    <title>Accueil</title>
     @vite('resources/js/app.js')
 </head>
 <body>
