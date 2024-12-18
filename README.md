@@ -89,7 +89,13 @@ php artisan migrate
 php artisan db:seed
 ```
 
-### **6. Démarrer le serveur**
+### **6. Lier le stockage**
+
+```bash
+php artisan storage:link
+```
+
+### **7. Démarrer le serveur**
 
 1. **Lancer le serveur Laravel** :
 
