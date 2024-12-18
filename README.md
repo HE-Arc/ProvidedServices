@@ -1,4 +1,4 @@
-# **Projet Web Laravel : ProvidedServices**
+# **Projet Web Laravel : Provided Services**
 
 ## **Description du projet**
 
